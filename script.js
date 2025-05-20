@@ -1,10 +1,11 @@
 // script.js
 
 // Import the functions you need from the SDKs you need
-// Firebase SDK version updated to 11.8.0
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js"; // Assuming you still need Firestore
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-analytics.js";
+// Firebase SDK import style updated as per your request
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// Firestore is used in this script, so we need to import its functions as well
+import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -13,25 +14,25 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.0/firebase
 // Your web app's Firebase configuration - Updated
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyCEH65YbNirj_IRmtsIJZS-HNEbsRBBsSQ",
-    authDomain: "sustainable-tourism-65025.firebaseapp.com",
-    projectId: "sustainable-tourism-65025",
-    storageBucket: "sustainable-tourism-65025.firebasestorage.app",
-    messagingSenderId: "781325465882",
-    appId: "1:781325465882:web:5cfaf482a5e1ac696814a3", // App ID Updated
-    measurementId: "G-3MC4415KMJ" // Measurement ID Updated
+  apiKey: "AIzaSyCBO_KuvKhoadsYV8DMukGrq6I8mMkS1a4",
+  authDomain: "corporate-sustainability-1.firebaseapp.com",
+  projectId: "corporate-sustainability-1",
+  storageBucket: "corporate-sustainability-1.firebasestorage.app",
+  messagingSenderId: "696147135831",
+  appId: "1:696147135831:web:979f185e9973a4ac214212",
+  measurementId: "G-KCJNCM1R9B"
 };
 
 // Initialize Firebase
 let app;
-let db; // Keep db if you are using Firestore
+let db; // Firestore database instance
 let analytics;
 
 try {
     app = initializeApp(firebaseConfig);
     analytics = getAnalytics(app);
-    db = getFirestore(app); // Initialize Firestore if you are using it
-    console.log("Firebase initialized successfully with new config (v11.8.0).");
+    db = getFirestore(app); // Initialize Firestore
+    console.log("Firebase initialized successfully with new config and import style.");
 } catch (error) {
     console.error("Error initializing Firebase with new config:", error);
     const networkStatsStatusElement = document.getElementById('network-stats-status');
