@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水里永續共好聯盟 – 山村永續旅遊</title>
+    <title>台聚集團企業員工低碳永續旅遊</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3nputPciVexm3dQrBM-LH8cH-fexbDvQ&libraries=geometry,routes&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwNfK9p-tYV9iR7OGjr0um8ZvJ9Hr49cM&libraries=geometry,routes&callback=initMap"></script>
+    <script type="module" src="script.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
 
     <header class="bg-green-700 text-white p-6 text-center shadow-md relative">
-         <div class="absolute top-3 left-3 text-left text-xs text-gray-200">
-             建議使用 Chrome 瀏覽器
-         </div>
-        <h1 class="text-3xl font-bold">水里永續共好聯盟 – 山村永續旅遊</h1>
+         <div class="absolute top-3 left-3 text-left text-xs text-gray-200">請使用單一瀏覽器，清除cookie會使紀錄流失</div>
+        <h1 class="text-3xl font-bold">台聚集團企業員工低碳永續旅遊</h1>
         <p class="mt-2 text-lg">一起用低碳方式探索美麗水里山村</p>
     </header>
 
@@ -25,14 +24,14 @@
         <section id="homepage" class="page-section block bg-white p-6 rounded-lg shadow-lg">
 
             <div class="bg-green-50 p-6 rounded-lg shadow-inner mb-8">
-                <h3 class="text-2xl font-semibold mb-5 text-green-700 text-center">旅遊管理統計</h3>
+                <h3 class="text-2xl font-semibold mb-5 text-green-700 text-center">旅遊管理統計 (您的數據)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="p-4 bg-white rounded-md shadow-sm border border-green-200">
-                        <label for="player-name" class="block text-sm font-medium text-gray-700 mb-1">玩家姓名:</label>
+                        <label for="player-name" class="block text-sm font-medium text-gray-700 mb-1">永續旅者姓名:</label>
                         <input type="text" id="player-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 text-center text-base p-2" placeholder="請輸入您的姓名">
                     </div>
                     <div class="p-4 bg-white rounded-md shadow-sm border border-green-200 text-center flex flex-col justify-center">
-                        <p class="text-sm font-medium text-gray-700">您的隨機碼:</p>
+                        <p class="text-sm font-medium text-gray-700">永續旅者或集團企業員工隨機碼:</p>
                         <p id="player-code" class="mt-1 text-2xl font-bold text-green-600">生成中...</p>
                     </div>
                 </div>
@@ -53,12 +52,22 @@
                 </div>
             </div>
 
-            <h2 class="text-2xl font-semibold mb-6 text-green-800 text-center">選擇您的低碳交通方式</h2>
+            <div class="bg-blue-50 p-6 rounded-lg shadow-inner mb-8">
+                 <h3 class="text-2xl font-semibold mb-5 text-blue-700 text-center">網路累計減碳量 (所有永續旅者)</h3>
+                 <div class="text-center">
+                     <p class="text-sm font-medium text-gray-700">所有永續旅者累計減碳總量:</p>
+                     <p id="network-total-carbon-reduction" class="mt-1 text-3xl font-bold text-blue-600">載入中...</p>
+                     <p id="network-stats-status" class="text-xs text-gray-600 mt-2">從伺服器載入中...</p>
+                 </div>
+            </div>
+
+
+            <h2 class="text-2xl font-semibold mb-6 text-green-800 text-center">選擇您的低碳交通方式或活動</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="bike" data-carbon-reduction="500">
+                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="bike" data-carbon-reduction="350">
                     <span class="text-3xl mb-3">🚲</span>
                     <span class="font-semibold text-center text-sm">腳踏車</span>
-                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 500g/10km</span>
+                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 350g/10km</span>
                     <span class="text-xs text-gray-500 mt-1 text-center">好處: 彈性高、健身、深度體驗</span>
                 </button>
                 <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="walk" data-carbon-reduction="400">
@@ -67,16 +76,16 @@
                     <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 400g/10km</span>
                     <span class="text-xs text-gray-500 mt-1 text-center">好處: 最低碳、細細品味、健康</span>
                 </button>
-                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="bus_train" data-carbon-reduction="100">
+                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="bus_train" data-carbon-reduction="300">
                     <span class="text-3xl mb-3">🚌</span>
                     <span class="font-semibold text-center text-sm">共乘巴士 (公車/火車/遊覽巴士)</span>
-                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 100g/人/10km</span>
+                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 300g/人/10km</span>
                     <span class="text-xs text-gray-500 mt-1 text-center">好處: 輕鬆便利、減少交通壓力</span>
                 </button>
-                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_2_moto" data-carbon-reduction="150">
+                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_2_moto" data-carbon-reduction="100">
                     <span class="text-3xl mb-3">🏍️🚗</span>
                     <span class="font-semibold text-center text-sm">私家車共乘 2 人 / 摩托車</span>
-                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 150g/人/10km</span>
+                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 100g/人/10km</span>
                     <span class="text-xs text-gray-500 mt-1 text-center">好處: 分攤費用、減少車輛數</span>
                 </button>
                 <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_3" data-carbon-reduction="120">
@@ -85,16 +94,16 @@
                     <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 120g/人/10km</span>
                     <span class="text-xs text-gray-500 mt-1 text-center">好處: 更有效率的共乘</span>
                 </button>
-                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_4" data-carbon-reduction="100">
+                <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_4" data-carbon-reduction="150">
                     <span class="text-3xl mb-3">🚗</span>
                     <span class="font-semibold text-center text-sm">私家車共乘 4 人</span>
-                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 100g/人/10km</span>
+                    <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 150g/人/10km</span>
                     <span class="text-xs text-gray-500 mt-1 text-center">好處: 顯著減少碳排</span>
                 </button>
-                 <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_5" data-carbon-reduction="80">
+                 <button class="transport-option flex flex-col items-center p-5 bg-green-100 rounded-lg shadow hover:bg-green-200 transition-all duration-300 ease-in-out" data-transport="carpool_5" data-carbon-reduction="200">
                      <span class="text-3xl mb-3">🚗</span>
                      <span class="font-semibold text-center text-sm">私家車共乘 5 人</span>
-                     <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 80g/人/10km</span>
+                     <span class="text-xs text-gray-600 mt-2 text-center">減碳數據: 約 200g/人/10km</span>
                      <span class="text-xs text-gray-500 mt-1 text-center">好處: 最佳共乘效率</span>
                  </button>
                  <button class="transport-option flex flex-col items-center p-5 bg-blue-100 rounded-lg shadow hover:bg-blue-200 transition-all duration-300 ease-in-out" data-transport="thsr_haoxing" data-carbon-reduction="0">
@@ -108,6 +117,12 @@
                      <span class="font-semibold text-center text-sm">我要預約多元計程車導覽旅遊</span>
                       <span class="text-xs text-gray-500 mt-1 text-center">點擊查看資訊</span>
                  </button>
+                 <button id="market-mileage-button" class="flex flex-col items-center p-5 bg-purple-100 rounded-lg shadow hover:bg-purple-200 transition-all duration-300 ease-in-out">
+                    <span class="text-3xl mb-3">🛍️</span>
+                    <span class="font-semibold text-center text-sm">逛市集增里程</span>
+                    <span class="text-xs text-gray-600 mt-2 text-center">記錄您的市集消費</span>
+                    <span class="text-xs text-gray-500 mt-1 text-center">好處: 支持在地、獲得里程</span>
+                </button>
             </div>
 
             <div id="thsr-info" class="hidden"></div>
@@ -126,9 +141,12 @@
                      </a>
                  </div>
                  <div class="mt-6 text-center">
-                     <button id="download-data-button" class="px-8 py-4 bg-blue-700 text-white font-bold rounded-lg shadow hover:bg-blue-800 transition-all duration-300 ease-in-out text-lg">
+                     <button id="download-data-button" class="px-6 py-3 bg-blue-700 text-white font-bold rounded-lg shadow hover:bg-blue-800 transition-all duration-300 ease-in-out text-lg">
                          下載永續旅遊數據 (.html) <i class="fas fa-download ml-2"></i>
                      </button>
+                     <button id="upload-csv-button" class="ml-4 px-6 py-3 bg-teal-600 text-white font-bold rounded-lg shadow hover:bg-teal-700 transition-all duration-300 ease-in-out text-lg">
+                        上傳旅遊減碳數據 <i class="fas fa-upload ml-2"></i>
+                    </button>
                  </div>
              </div>
 
@@ -152,7 +170,7 @@
                     <li>山形兒童活動工作室 Wild Kids Studio</li>
                 </ul>
                 <p class="mt-6 text-gray-700">© 2025 水里永續共好聯盟。版權所有。</p>
-                <p class="mt-2 text-gray-700">V2.1，歡迎至FACEBOOK粉專「<a href="https://www.facebook.com/Satoyamadining" target="_blank" class="text-green-600 hover:underline">里山餐桌</a>」提出建議。</p>
+                <p class="mt-2 text-gray-700">V2.2，歡迎至FACEBOOK粉專「<a href="https://www.facebook.com/Satoyamadining" target="_blank" class="text-green-600 hover:underline">里山餐桌</a>」提出建議。</p>
                 <p class="mt-2 text-gray-700">本聯盟不定時舉辦永續積分競賽活動，競賽期間依據版本編號及積分領取活動獎品。</p>
                 <p class="font-semibold text-orange-600 mt-4">注意：版本更新時將新增景點與任務；不同版本之間旅遊數據不互通。</p>
             </div>
@@ -207,7 +225,7 @@
                             </div>
 
                             <textarea id="sustainable-action-log" class="w-full p-3 border rounded-md focus:outline-none focus:ring focus:border-green-500 text-sm" rows="4" placeholder="請在此輸入您具體的永續行動記錄..."></textarea>
-                            <button id="log-action-button" class="mt-3 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-check-circle mr-2"></i>記錄行動並獲得積分</button>
+                            <button id="log-action-button" class="mt-3 px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-check-circle mr-2"></i>記錄行動並獲得積分</button>
                             <p id="action-log-status" class="mt-3 text-sm font-semibold text-gray-600"></p>
                         </div>
 
@@ -219,7 +237,7 @@
                              <ul id="activity-list" class="space-y-2 text-sm text-gray-700 mb-4">
                                  <li class="text-gray-500 text-center">載入活動中...</li>
                              </ul>
-                             <button id="participate-activity-button" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-calendar-check mr-2"></i>參加活動 (輸入驗證碼與內容)</button>
+                             <button id="participate-activity-button" class="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-calendar-check mr-2"></i>參加活動 (輸入驗證碼與內容)</button>
                          </div>
 
                          <div class="bg-green-50 p-4 rounded-lg shadow-inner max-h-[300px] overflow-y-auto border border-green-200">
@@ -246,7 +264,30 @@
                  <p id="poi-modal-coordinates" class="text-sm text-gray-600 mt-4"></p>
                  <div id="poi-modal-social" class="mt-4 text-sm">
                  </div>
+                 <div id="poi12-buttons" class="mt-6 hidden flex flex-col space-y-3">
+                      <a href="https://farmcbd.my.canva.site/dagl50o3mt8" target="_blank" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow hover:bg-blue-700 transition-all duration-300 ease-in-out text-center"><i class="fas fa-gamepad mr-2"></i>水里四季梅遊小遊戲</a>
+                      <button id="sroi-order-button-poi12" class="px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow hover:bg-purple-700 transition-all duration-300 ease-in-out text-center"><i class="fas fa-leaf mr-2"></i>SROI生態棲地農產品訂購&ESG企業採購表單</button>
+                 </div>
+                 <div id="sroi-info-button-container" class="mt-6 hidden">
+                     <button id="show-sroi-info-button" class="w-full px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow hover:bg-purple-700 transition-all duration-300 ease-in-out text-center"><i class="fas fa-leaf mr-2"></i>SROI生態棲地農產品訂購&ESG企業採購表單</button>
+                 </div>
+                 <div id="poi-modal-dynamic-buttons" class="mt-6 space-y-3"></div>
             </div>
+
+            <div id="poi-review-section" class="hidden mt-6 pt-4 border-t border-gray-200">
+                 <h4 class="text-lg font-medium mb-3 text-gray-600">永續消費審核 (消費並輸入審核碼獲得積分)</h4>
+                 <div class="mb-3">
+                     <label for="consumption-amount" class="block text-sm font-medium text-gray-700 mb-1">消費金額:</label>
+                     <input type="number" id="consumption-amount" class="w-full p-2 border rounded-md focus:outline-none focus:ring focus:border-green-500 text-sm" step="1" min="0" placeholder="請輸入消費金額">
+                 </div>
+                 <div class="mb-4">
+                     <label for="review-code" class="block text-sm font-medium text-gray-700 mb-1">審核碼 (3碼數字):</label>
+                     <input type="text" id="review-code" class="w-full p-2 border rounded-md focus:outline-none focus:ring focus:border-green-500 text-sm" maxlength="3" placeholder="請輸入3碼數字審核碼">
+                 </div>
+                 <button id="submit-poi-review" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-check-circle mr-2"></i>提交審核並獲得積分</button>
+                 <p id="poi-review-status" class="mt-3 text-sm font-semibold text-gray-600"></p>
+            </div>
+
              <div class="mt-6 flex justify-end space-x-4">
                  <button id="set-as-start-button" class="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all duration-300 ease-in-out"><i class="fas fa-map-marker-alt mr-2"></i>設定為起點</button>
                  <button id="set-as-end-button" class="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-300 ease-in-out"><i class="fas fa-flag-checkered mr-2"></i>設定為終點</button>
@@ -263,7 +304,7 @@
             <input type="text" id="verification-code-input" class="w-full p-3 border rounded-md mb-4 focus:outline-none focus:ring focus:border-green-500">
             <p class="mb-2 text-gray-700">請輸入活動內容或課程名稱</p>
             <textarea id="activity-content-input" class="w-full p-3 border rounded-md mb-4 focus:outline-none focus:ring focus:border-green-500" rows="3" placeholder="例如：參加了里山倡議食農下午茶講堂，學習製作香草餅乾"></textarea>
-            <button id="submit-activity-log" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-check-square mr-2"></i>記錄活動並獲得積分</button>
+            <button id="submit-activity-log" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition-all duration-300 ease-in-out text-sm"><i class="fas fa-check-square mr-2"></i>記錄活動並獲得積分</button>
             <p id="activity-log-status" class="mt-4 text-sm font-semibold text-gray-700"></p>
         </div>
     </div>
@@ -286,7 +327,7 @@
         </div>
     </div>
 
-     <div id="log-trip-modal" class="modal-overlay hidden">
+    <div id="log-trip-modal" class="modal-overlay hidden">
         <div class="modal-content shadow-xl">
             <span class="close-button">×</span>
             <h3 class="text-2xl font-bold mb-4 text-orange-700">記錄前往景點的旅程</h3>
@@ -329,6 +370,49 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <div id="sroi-info-modal" class="modal-overlay hidden">
+        <div class="modal-content shadow-xl">
+            <span class="close-button">×</span>
+            <h3 class="text-2xl font-bold mb-4 text-purple-700">SROI生態棲地農產品訂購&ESG企業採購資訊</h3>
+             <p class="mb-4 text-gray-700">景點：<span id="sroi-modal-poi-name" class="font-semibold text-green-800"></span></p>
+            <div id="sroi-modal-content-body" class="text-gray-700 leading-relaxed space-y-3">
+                 </div>
+        </div>
+    </div>
+
+    <div id="market-selection-modal" class="modal-overlay hidden">
+        <div class="modal-content shadow-xl w-full max-w-lg">
+            <span class="close-button">×</span>
+            <h3 class="text-2xl font-bold mb-6 text-purple-700 text-center">地產地銷最減碳</h3>
+
+            <div id="market-type-selection-step">
+                <h4 class="text-lg font-semibold mb-3 text-gray-700">步驟 1: 選擇市集類型</h4>
+                <div id="market-type-options" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    </div>
+            </div>
+
+            <div id="product-type-selection-step" class="hidden">
+                <h4 class="text-lg font-semibold mb-1 text-gray-700">步驟 2: 選擇消費商品/服務類型</h4>
+                <p class="text-sm text-gray-600 mb-3">您在 <span id="selected-market-type-display" class="font-semibold text-purple-600"></span> 消費了什麼？</p>
+                <div id="product-type-options" class="space-y-3 mb-6">
+                    </div>
+                 <div class="mt-4">
+                    <label for="market-store-code" class="block text-sm font-medium text-gray-700 mb-1">商店碼 (5位數字):</label>
+                    <input type="text" id="market-store-code" class="w-full p-3 border rounded-md focus:outline-none focus:ring focus:border-purple-500 text-sm" maxlength="5" placeholder="請輸入5位數字商店碼">
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button id="submit-market-activity-button" class="px-8 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow hover:bg-purple-700 transition-colors duration-300 ease-in-out disabled:opacity-50" disabled>
+                    <i class="fas fa-check-circle mr-2"></i>確認並記錄消費
+                </button>
+                <button id="back-to-market-type-button" class="hidden ml-2 px-6 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg shadow hover:bg-gray-400 transition-colors duration-300 ease-in-out">
+                    <i class="fas fa-arrow-left mr-2"></i>返回選擇市集
+                </button>
+                <p id="market-activity-status" class="mt-4 text-sm font-semibold text-gray-700"></p>
+            </div>
+        </div>
+    </div>
+
+    </body>
 </html>
