@@ -268,64 +268,73 @@ const localStorageKey = 'shuilSustainableTourismData_v2.2'; // Updated key for v
 const localStorageActionsKey = 'shuilSustainableTourismActions_v2.2'; // Updated key for versioning
 
 function loadData() {
-    console.log("Loading data from localStorage..."); // Debugging line
+    console.log("Loading data from localStorage...");
     const data = localStorage.getItem(localStorageKey);
+    let parsedData = null; 
+
     if (data) {
-        const parsedData = JSON.parse(data);
+        try {
+            parsedData = JSON.parse(data);
+        } catch (e) {
+            console.error("Error parsing localStorage data:", e);
+            localStorage.removeItem(localStorageKey); 
+        }
+    }
+
+    if (parsedData) { 
         totalMileage = parsedData.totalMileage || 0;
         totalCarbonReduction = parsedData.totalCarbonReduction || 0;
         totalScore = parsedData.totalScore || 0;
-        playerName = parsedData.playerName || ''; // Load player name
-        playerCode = parsedData.playerCode || ''; // Load player code
-
-        // If player code is not loaded (first time or cleared data), generate a new one
+        playerName = parsedData.playerName || '';
+        playerCode = parsedData.playerCode || '';
         if (!playerCode) {
             playerCode = generateRandomCode();
-            console.log("Generated new player code:", playerCode); // Debugging line
+            console.log("Generated new player code (was missing in parsed data):", playerCode);
         } else {
-             console.log("Loaded player code:", playerCode); // Debugging line
+             console.log("Loaded player code:", playerCode);
         }
-
-
         updateStatsDisplay();
-         document.getElementById('stats-load-status').textContent = '已成功載入之前的旅遊數據。'; // Update status message
-         document.getElementById('stats-load-status').classList.remove('text-gray-600');
-         document.getElementById('stats-load-status').classList.add('text-green-600');
-
+        document.getElementById('stats-load-status').textContent = '已成功載入之前的旅遊數據。';
+        document.getElementById('stats-load-status').classList.remove('text-gray-600');
+        document.getElementById('stats-load-status').classList.add('text-green-600');
     } else {
-         // If no data at all, generate a new code and initialize stats
          playerCode = generateRandomCode();
          totalMileage = 0;
          totalCarbonReduction = 0;
          totalScore = 0;
          playerName = '';
-         console.log("No data found, generated new player code and initialized stats:", playerCode); // Debugging line
-         updateStatsDisplay(); // Update display with initial stats and new code
-         document.getElementById('stats-load-status').textContent = '未發現先前的旅遊數據，已建立新的永續旅者紀錄。'; // Update status message
+         console.log("No valid data found in localStorage or data was corrupted, generated new player code and initialized stats:", playerCode);
+         updateStatsDisplay();
+         document.getElementById('stats-load-status').textContent = '未發現先前的旅遊數據或數據已重設，已建立新的永續旅者紀錄。';
          document.getElementById('stats-load-status').classList.remove('text-gray-600');
          document.getElementById('stats-load-status').classList.add('text-blue-600');
     }
 
-    // Load action logs
-    console.log("Loading action logs from localStorage..."); // Debugging line
     const actionsData = localStorage.getItem(localStorageActionsKey);
     if (actionsData) {
-        loggedActions = JSON.parse(actionsData);
-        console.log("Loaded action logs:", loggedActions); // Debugging line
-        renderLoggedActions(); // Display loaded actions
+        try {
+            loggedActions = JSON.parse(actionsData);
+            console.log("Loaded action logs:", loggedActions);
+            renderLoggedActions();
+        } catch (e) {
+            console.error("Error parsing localStorage actions data:", e);
+            localStorage.removeItem(localStorageActionsKey); 
+            loggedActions = [];
+            loggedActionsListElement.innerHTML = '<p class="text-gray-500 text-center">行動紀錄讀取錯誤，已重設。</p>';
+        }
     } else {
-         loggedActions = []; // Initialize as empty array if no data
-         loggedActionsListElement.innerHTML = '<p class="text-gray-500 text-center">尚無行動紀錄</p>'; // Show empty message if no data
-         console.log("No action logs found."); // Debugging line
+         loggedActions = [];
+         loggedActionsListElement.innerHTML = '<p class="text-gray-500 text-center">尚無行動紀錄</p>';
+         console.log("No action logs found.");
     }
-     saveData(); // Save data including the potentially new code and initialized actions
-     console.log("Data loading complete."); // Debugging line
 
-     // Fetch and display network-wide total (only if Firebase initialized successfully)
+    saveData(); 
+    console.log("Data loading function complete.");
+
     if (db) {
         fetchNetworkTotalCarbonReduction();
     } else {
-         console.warn("Firebase not initialized, cannot fetch network total.");
+         console.warn("Firebase db not initialized, cannot fetch network total.");
     }
 }
 
@@ -362,12 +371,18 @@ function saveData() {
 }
 
 function updateStatsDisplay() {
-    totalMileageSpan.textContent = `${(totalMileage / 1000).toFixed(2)} km`; // Display in km
+    totalMileageSpan.textContent = `${(totalMileage / 1000).toFixed(2)} km`;
     totalCarbonReductionSpan.textContent = `${totalCarbonReduction.toFixed(2)} g`;
     totalScoreSpan.textContent = totalScore;
-    playerNameInput.value = playerName; // Set player name input value
-    playerCodeDisplay.textContent = playerCode; // Display player code
-    console.log("Stats display updated."); // Debugging line
+    playerNameInput.value = playerName;
+
+    console.log("Updating player code display. Player code:", playerCode, "Element:", playerCodeDisplay); // DEBUGGING LINE
+    if (playerCodeDisplay) {
+        playerCodeDisplay.textContent = playerCode;
+    } else {
+        console.error("playerCodeDisplay element not found!");
+    }
+    console.log("Stats display updated.");
 }
 
 // --- Generate Random Code ---
