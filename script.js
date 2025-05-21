@@ -1,11 +1,11 @@
 // script.js
 
 // Import the functions you need from the SDKs you need
-// Firebase SDK import style updated as per your request
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+// Firebase SDK version updated to 11.8.0 using CDN URLs
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-analytics.js";
 // Firestore is used in this script, so we need to import its functions as well
-import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -32,7 +32,7 @@ try {
     app = initializeApp(firebaseConfig);
     analytics = getAnalytics(app);
     db = getFirestore(app); // Initialize Firestore
-    console.log("Firebase initialized successfully with new config and import style.");
+    console.log("Firebase initialized successfully with new config (v11.8.0 CDN).");
 } catch (error) {
     console.error("Error initializing Firebase with new config:", error);
     const networkStatsStatusElement = document.getElementById('network-stats-status');
