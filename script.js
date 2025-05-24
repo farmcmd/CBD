@@ -1493,13 +1493,17 @@ function showLogTripModal(poi) {
 // Function to hide the manual log trip modal
 function hideLogTripModal() {
     console.log("Hiding log trip modal.");
-    logTripModal.classList.add('hidden');
+    if (logTripModal) { // Check if logTripModal exists
+        logTripModal.classList.add('hidden');
+    }
     currentLogTripPoi = null; // Clear the stored POI
     selectedLogTripTransport = null; // Clear selected transport
     // Remove selected class from transport buttons in the modal
-    logTripTransportOptionsDiv.querySelectorAll('.log-trip-transport-button').forEach(button => {
-        button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
-    });
+    if (logTripTransportOptionsDiv) { // Check if logTripTransportOptionsDiv exists
+        logTripTransportOptionsDiv.querySelectorAll('.log-trip-transport-button').forEach(button => {
+            button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
+        });
+    }
 }
 
 // Function to handle selection of transport in the manual log trip modal
@@ -1508,14 +1512,18 @@ let selectedLogTripTransport = null; // State variable for selected transport in
 function handleLogTripTransportSelect() {
     console.log("Log trip transport button clicked:", this.dataset.transport);
     // Remove selected class from all buttons in this modal
-    logTripTransportOptionsDiv.querySelectorAll('.log-trip-transport-button').forEach(button => {
-        button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
-    });
+    if (logTripTransportOptionsDiv) {
+        logTripTransportOptionsDiv.querySelectorAll('.log-trip-transport-button').forEach(button => {
+            button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
+        });
+    }
 
     // Add selected class to the clicked button
     this.classList.add('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
     selectedLogTripTransport = this.dataset.transport; // Store the selected transport key
-    logTripTransportStatusElement.classList.add('hidden'); // Hide status if transport is selected
+    if (logTripTransportStatusElement) {
+        logTripTransportStatusElement.classList.add('hidden'); // Hide status if transport is selected
+    }
     console.log("Selected manual log trip transport:", selectedLogTripTransport);
 }
 
@@ -1525,33 +1533,52 @@ function submitLogTrip() {
     console.log("Submit log trip button clicked.");
 
     // Clear previous status messages
-    logTripStatusElement.textContent = '';
-    logTripStatusElement.className = 'mt-4 text-sm font-semibold text-gray-700'; // Reset class
-    logTripTransportStatusElement.classList.add('hidden');
-    logTripMileageStatusElement.classList.add('hidden');
+    if (logTripStatusElement) {
+        logTripStatusElement.textContent = '';
+        logTripStatusElement.className = 'mt-4 text-sm font-semibold text-gray-700'; // Reset class
+    }
+    if (logTripTransportStatusElement) logTripTransportStatusElement.classList.add('hidden');
+    if (logTripMileageStatusElement) logTripMileageStatusElement.classList.add('hidden');
 
 
     if (!currentLogTripPoi) {
         console.error("No POI selected for manual trip logging.");
-         logTripStatusElement.textContent = '發生錯誤：未選擇景點。';
-         logTripStatusElement.classList.add('text-red-600');
+        if (logTripStatusElement) {
+             logTripStatusElement.textContent = '發生錯誤：未選擇景點。';
+             logTripStatusElement.classList.add('text-red-600');
+        }
         return;
     }
 
     if (!selectedLogTripTransport) {
-        logTripTransportStatusElement.textContent = '請選擇交通方式。';
-        logTripTransportStatusElement.classList.remove('hidden');
-        logTripTransportStatusElement.classList.add('text-red-600');
+        if (logTripTransportStatusElement) {
+            logTripTransportStatusElement.textContent = '請選擇交通方式。';
+            logTripTransportStatusElement.classList.remove('hidden');
+            logTripTransportStatusElement.classList.add('text-red-600');
+        }
         console.warn("No transport selected for manual log trip.");
         return;
     }
 
+    const transportInfo = transportData[selectedLogTripTransport]; // Get transportInfo
+    if (!transportInfo) { // Check if transportInfo is valid
+        console.error("Invalid transport selected for manual log:", selectedLogTripTransport);
+        if (logTripStatusElement) {
+            logTripStatusElement.textContent = '選擇的交通方式無效，請重新選擇。';
+            logTripStatusElement.className = 'mt-4 text-sm font-semibold text-red-600';
+        }
+        return;
+    }
+
+
     const mileageKm = parseFloat(logTripMileageInput.value);
 
     if (isNaN(mileageKm) || mileageKm < 0) { // Allow 0 km for cases where user might just want to log arrival without distance
-        logTripMileageStatusElement.textContent = '請輸入有效的里程數 (大於等於 0)。';
-        logTripMileageStatusElement.classList.remove('hidden');
-        logTripMileageStatusElement.classList.add('text-red-600');
+        if (logTripMileageStatusElement) {
+            logTripMileageStatusElement.textContent = '請輸入有效的里程數 (大於等於 0)。';
+            logTripMileageStatusElement.classList.remove('hidden');
+            logTripMileageStatusElement.classList.add('text-red-600');
+        }
         console.warn("Invalid mileage input:", mileageKm);
         return;
     }
@@ -1560,68 +1587,64 @@ function submitLogTrip() {
 
     // Calculate carbon reduction for this manual trip
     let tripCarbonReduction = 0;
-    const transportInfo = transportData[selectedLogTripTransport];
-    if (transportInfo && transportInfo.carbonReductionPer10km > 0) {
+    // const transportInfo = transportData[selectedLogTripTransport]; // Already defined and checked
+    if (transportInfo.carbonReductionPer10km > 0) { // No need to check transportInfo again
         const carbonReductionPerMeter = transportInfo.carbonReductionPer10km / 10000;
         tripCarbonReduction = mileageInMeters * carbonReductionPerMeter;
     }
 
-    // --- FIX: Add the calculated values to the total stats ---
     totalMileage += mileageInMeters;
     totalCarbonReduction += tripCarbonReduction;
-    // Calculate score for this manual trip
     let scoreForThisTrip = 0;
-     if (transportInfo && transportInfo.metersPerPoint !== Infinity) {
+     if (transportInfo.metersPerPoint !== Infinity) {
           const metersPerPoint = transportInfo.metersPerPoint;
           scoreForThisTrip = Math.floor(mileageInMeters / metersPerPoint);
-          totalScore += scoreForThisTrip; // Add to total score
+          totalScore += scoreForThisTrip;
      } else {
-         console.log("No distance-based score for this manual transport type."); // Debugging line
+         console.log("No distance-based score for this manual transport type.");
      }
-    // --- END FIX ---
 
 
-    updateStatsDisplay(); // Update displays
-    // saveData(); // Called in newLogEntry
+    updateStatsDisplay();
 
     const now = new Date();
     const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
     const newLogEntry = {
-        type: 'trip_to_poi', // Mark this as a manual trip to POI log
+        type: 'trip_to_poi',
         poiName: currentLogTripPoi.name,
         transportName: transportInfo.name,
         transportIcon: transportInfo.icon,
         mileageInMeters: mileageInMeters,
         carbonReduction: tripCarbonReduction,
-        points: scoreForThisTrip, // Score from this trip
+        points: scoreForThisTrip,
         timestamp: timestamp
     };
 
-    loggedActions.push(newLogEntry); // Add new log to the array
-    saveData(); // Save updated logs and potentially send data to server
-    renderLoggedActions(); // Re-render the list
+    loggedActions.push(newLogEntry);
+    saveData();
+    renderLoggedActions();
 
-    console.log("Logged Manual Trip:", newLogEntry); // Debugging line
+    console.log("Logged Manual Trip:", newLogEntry);
 
-    logTripStatusElement.textContent = `已記錄前往 ${currentLogTripPoi.name} 的旅程！里程: ${mileageKm.toFixed(2)} km, 估計減碳: ${tripCarbonReduction.toFixed(2)} g. 獲得分數: ${scoreForThisTrip}`;
-    logTripStatusElement.classList.add('text-green-600'); // Add green for success
+    if (logTripStatusElement) {
+        logTripStatusElement.textContent = `已記錄前往 ${currentLogTripPoi.name} 的旅程！里程: ${mileageKm.toFixed(2)} km, 估計減碳: ${tripCarbonReduction.toFixed(2)} g. 獲得分數: ${scoreForThisTrip}`;
+        logTripStatusElement.classList.add('text-green-600');
+    }
 
-    // Clear inputs and reset state after submission
     logTripMileageInput.value = '';
     selectedLogTripTransport = null;
-    logTripTransportOptionsDiv.querySelectorAll('.log-trip-transport-button').forEach(button => {
-        button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
-    });
+    if (logTripTransportOptionsDiv) {
+        logTripTransportOptionsDiv.querySelectorAll('.log-trip-transport-button').forEach(button => {
+            button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold');
+        });
+    }
 
-
-     // --- MODIFICATION: Close the modal on successful submission with a delay ---
      setTimeout(() => {
         hideLogTripModal();
-     }, 1500); // Close modal after 1.5 seconds
+     }, 1500);
 
-
-     currentLogTripPoi = null; // Clear stored POI
+     currentLogTripPoi = null;
 }
 
 
@@ -1639,11 +1662,6 @@ function submitLogTrip() {
  // --- Taxi Info Modal ---
  function showTaxiInfoModal() {
      console.log("Showing taxi info modal.");
-     // Populate the modal content with the taxi information
-     // Removed placeholder text and added the new field
-     // const taxiInfoContent = taxiInfoModal.querySelector('.modal-content div'); // This might be too generic
-     // It's better to have specific IDs if the content is dynamic or complex, but for static it's okay.
-     // For now, assuming the structure is static as in the HTML.
      taxiInfoModal.classList.remove('hidden');
  }
 
@@ -1655,12 +1673,10 @@ function submitLogTrip() {
  // --- SROI Info Modal ---
  function showSroiInfoModal(sroiInfo, poiName) {
       console.log("Showing SROI info modal for:", poiName);
-      sroiModalPoiNameElement.textContent = poiName; // Set the POI name in the modal
+      sroiModalPoiNameElement.textContent = poiName;
 
-      // Clear previous content
       sroiModalContentBody.innerHTML = '';
 
-      // Add Report Link
       if (sroiInfo.reportLink) {
           const reportLinkElement = document.createElement('a');
           reportLinkElement.href = sroiInfo.reportLink;
@@ -1675,38 +1691,35 @@ function submitLogTrip() {
            sroiModalContentBody.appendChild(noReportElement);
       }
 
-      // Add Form Link
       if (sroiInfo.formLink) {
           const formLinkElement = document.createElement('a');
           formLinkElement.href = sroiInfo.formLink;
           formLinkElement.target = "_blank";
-          formLinkElement.classList.add('block', 'text-blue-600', 'hover:underline', 'font-semibold', 'mt-2'); // Added mt-2 for spacing
+          formLinkElement.classList.add('block', 'text-blue-600', 'hover:underline', 'font-semibold', 'mt-2');
           formLinkElement.innerHTML = '<i class="fas fa-clipboard-list mr-1"></i>採購表單';
           sroiModalContentBody.appendChild(formLinkElement);
       } else {
            const noFormElement = document.createElement('p');
-           noFormElement.classList.add('text-gray-600', 'mt-2'); // Added mt-2
+           noFormElement.classList.add('text-gray-600', 'mt-2');
            noFormElement.innerHTML = '<i class="fas fa-info-circle mr-1"></i>採購表單：未提供';
            sroiModalContentBody.appendChild(noFormElement);
       }
 
-      // Add LINE ID - Check if it's a URL or just an ID
       if (sroiInfo.lineId) {
         const lineDisplayElement = document.createElement('p');
         lineDisplayElement.classList.add('text-gray-700', 'font-semibold', 'mt-2');
-        if (sroiInfo.lineId.startsWith('https://line.me/')) { // Check if it's a LINE URL
+        if (sroiInfo.lineId.startsWith('https://line.me/')) {
             lineDisplayElement.innerHTML = `<i class="fab fa-line mr-1"></i><a href="${sroiInfo.lineId}" target="_blank" class="text-blue-600 hover:underline">加入LINE群組/好友</a>`;
-        } else { // Assume it's an ID
+        } else {
             lineDisplayElement.innerHTML = `<i class="fab fa-line mr-1"></i>LINE ID: ${sroiInfo.lineId}`;
         }
         sroiModalContentBody.appendChild(lineDisplayElement);
       } else {
            const noLineIdElement = document.createElement('p');
-           noLineIdElement.classList.add('text-gray-600', 'mt-2'); // Added mt-2
+           noLineIdElement.classList.add('text-gray-600', 'mt-2');
            noLineIdElement.innerHTML = '<i class="fas fa-info-circle mr-1"></i>LINE ID：未提供';
            sroiModalContentBody.appendChild(noLineIdElement);
       }
-
 
       sroiInfoModal.classList.remove('hidden');
  }
@@ -1714,16 +1727,15 @@ function submitLogTrip() {
  function hideSroiInfoModal() {
       console.log("Hiding SROI info modal.");
       sroiInfoModal.classList.add('hidden');
-      sroiModalPoiNameElement.textContent = ''; // Clear POI name
-      sroiModalContentBody.innerHTML = ''; // Clear content
+      sroiModalPoiNameElement.textContent = '';
+      sroiModalContentBody.innerHTML = '';
  }
 
 
 // --- Download Data ---
 function downloadTourismData() {
-    console.log("Download data button clicked."); // Debugging line
+    console.log("Download data button clicked.");
 
-    // Create a simple HTML report
     let htmlContent = `
         <!DOCTYPE html>
         <html lang="zh-TW">
@@ -1749,7 +1761,6 @@ function downloadTourismData() {
         <body>
             <div class="container">
                 <h1>水里永續旅遊數據報告 V2.2</h1>
-
                 <div class="stats">
                     <h2>您的旅遊統計</h2>
                     <p><strong>永續旅者姓名:</strong> ${playerNameInput.value.trim() || '未提供'}</p>
@@ -1758,7 +1769,6 @@ function downloadTourismData() {
                     <p><strong>減碳總量:</strong> ${totalCarbonReduction.toFixed(2)} g</p>
                     <p><strong>永續分數:</strong> ${totalScore}</p>
                 </div>
-
                 <h2>我的行動紀錄</h2>
                 <div>
     `;
@@ -1766,14 +1776,11 @@ function downloadTourismData() {
     if (loggedActions.length === 0) {
         htmlContent += '<p>尚無行動紀錄</p>';
     } else {
-        // Sort logs by timestamp in descending order (most recent first)
         const sortedLogs = [...loggedActions].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
         sortedLogs.forEach(log => {
             htmlContent += '<div class="log-entry">';
             let logDetail = '';
             let pointsContent = (log.points !== undefined && log.points > 0) ? `<p class="log-points">獲得積分: ${log.points}</p>` : (log.points === 0 ? `<p class="log-points text-gray-600">獲得積分: 0</p>` : '');
-
             switch (log.type) {
                 case 'action':
                     logDetail = `<p class="log-type">永續行動記錄</p><p>選擇的行動: ${log.actions ? log.actions.join(', ') : '無'}</p><p>內容: ${log.text}</p>`;
@@ -1797,33 +1804,17 @@ function downloadTourismData() {
             htmlContent += `${logDetail}${pointsContent}<p class="timestamp">${log.timestamp}</p></div>`;
         });
     }
+    htmlContent += `</div></div></body></html>`;
 
-    htmlContent += `
-                </div> </div> </body>
-        </html>
-    `;
-
-    // Create a Blob with explicit UTF-8 charset and HTML type
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    console.log("Blob created with UTF-8 charset and HTML type:", blob); // Debugging line
-
-
-    // Create a download link
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `水里永續旅遊數據_${playerCode}_V2.2.html`; // Change filename extension to .html and include player code and version
-    console.log("Download link created:", a.href, "Filename:", a.download); // Debugging line
-
-
-    // Append to body and trigger click
+    a.download = `水里永續旅遊數據_${playerCode}_V2.2.html`;
     document.body.appendChild(a);
-    console.log("Triggering download."); // Debugging line
     a.click();
-
-    // Clean up
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-     console.log("Download data removed and object URL revoked."); // Debugging line
+    console.log("Download data complete.");
 }
 
  // --- Market Selection Modal Functions ---
@@ -1835,12 +1826,12 @@ function showMarketSelectionModal() {
     backToMarketTypeButton.classList.add('hidden');
     submitMarketActivityButton.disabled = true;
     marketActivityStatusElement.textContent = '';
-    marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-gray-700'; // Reset class
-    if(marketStoreCodeInput) marketStoreCodeInput.value = ''; // Clear store code input
+    marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-gray-700';
+    if(marketStoreCodeInput) marketStoreCodeInput.value = '';
     selectedMarketType = null;
     selectedMarketProduct = null;
     populateMarketTypeOptions();
-    productTypeOptionsDiv.innerHTML = ''; // Clear previous product options
+    productTypeOptionsDiv.innerHTML = '';
 }
 
 function hideMarketSelectionModal() {
@@ -1849,10 +1840,10 @@ function hideMarketSelectionModal() {
 }
 
 function populateMarketTypeOptions() {
-    marketTypeOptionsDiv.innerHTML = ''; // Clear existing options
+    marketTypeOptionsDiv.innerHTML = '';
     marketTypes.forEach(market => {
         const button = document.createElement('button');
-        button.className = 'market-option-button w-full text-left p-4 border rounded-lg hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-150 ease-in-out'; // Tailwind classes
+        button.className = 'market-option-button w-full text-left p-4 border rounded-lg hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-150 ease-in-out';
         button.innerHTML = `<span class="text-2xl mr-3">${market.icon}</span><span class="font-semibold">${market.name}</span>`;
         button.dataset.marketId = market.id;
         button.addEventListener('click', () => handleMarketTypeSelect(market));
@@ -1863,30 +1854,28 @@ function populateMarketTypeOptions() {
 function handleMarketTypeSelect(market) {
     console.log("Market type selected:", market.name);
     selectedMarketType = market;
-    // Highlight selected market button
     marketTypeOptionsDiv.querySelectorAll('.market-option-button').forEach(btn => {
-        btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'); // Tailwind for selection
+        btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700');
         if (btn.dataset.marketId === market.id) {
-            btn.classList.add('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'); // Tailwind for selection
+            btn.classList.add('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700');
         }
     });
-
     marketTypeSelectionStep.classList.add('hidden');
     productTypeSelectionStep.classList.remove('hidden');
     backToMarketTypeButton.classList.remove('hidden');
     selectedMarketTypeDisplay.textContent = market.name;
     populateProductOptions();
-    submitMarketActivityButton.disabled = true; // Require product selection
-    if(marketStoreCodeInput) marketStoreCodeInput.value = ''; // Clear store code when changing market type
-    marketActivityStatusElement.textContent = ''; // Clear status message
+    submitMarketActivityButton.disabled = true;
+    if(marketStoreCodeInput) marketStoreCodeInput.value = '';
+    marketActivityStatusElement.textContent = '';
 }
 
 function populateProductOptions() {
-    productTypeOptionsDiv.innerHTML = ''; // Clear existing options
+    productTypeOptionsDiv.innerHTML = '';
     Object.keys(marketProductData).forEach(productKey => {
         const product = marketProductData[productKey];
         const button = document.createElement('button');
-        button.className = 'product-option-button w-full text-left p-3 border rounded-lg hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-150 ease-in-out flex items-center justify-between'; // Tailwind classes
+        button.className = 'product-option-button w-full text-left p-3 border rounded-lg hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-150 ease-in-out flex items-center justify-between';
         button.innerHTML = `
             <div>
                 <span class="text-xl mr-2">${product.icon}</span>
@@ -1903,15 +1892,14 @@ function populateProductOptions() {
 function handleMarketProductSelect(productKey) {
     console.log("Market product selected:", marketProductData[productKey].name);
     selectedMarketProduct = marketProductData[productKey];
-    // Highlight selected product button
     productTypeOptionsDiv.querySelectorAll('.product-option-button').forEach(btn => {
-        btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'); // Tailwind for selection
+        btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700');
         if (btn.dataset.productId === productKey) {
-            btn.classList.add('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'); // Tailwind for selection
+            btn.classList.add('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700');
         }
     });
-    submitMarketActivityButton.disabled = false; // Enable submit button
-    marketActivityStatusElement.textContent = ''; // Clear status message
+    submitMarketActivityButton.disabled = false;
+    marketActivityStatusElement.textContent = '';
 }
 
 function handleBackToMarketType() {
@@ -1922,10 +1910,9 @@ function handleBackToMarketType() {
     selectedMarketProduct = null;
     submitMarketActivityButton.disabled = true;
     marketActivityStatusElement.textContent = '';
-    if(marketStoreCodeInput) marketStoreCodeInput.value = ''; // Clear store code
-    // Clear product selection highlight
+    if(marketStoreCodeInput) marketStoreCodeInput.value = '';
     productTypeOptionsDiv.querySelectorAll('.product-option-button.selected').forEach(btn => {
-        btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'); // Tailwind for selection
+        btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700');
     });
 }
 
@@ -1933,24 +1920,23 @@ function handleBackToMarketType() {
 function submitMarketActivity() {
     console.log("Submitting market activity.");
     const storeCode = marketStoreCodeInput ? marketStoreCodeInput.value.trim() : '';
-    const storeCodeRegex = /^[0-9]{5}$/; // Regex for exactly 5 digits
+    const storeCodeRegex = /^[0-9]{5}$/;
 
     if (!selectedMarketType || !selectedMarketProduct) {
         marketActivityStatusElement.textContent = '請選擇市集類型和消費商品。';
-        marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-red-600'; // Use className
+        marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-red-600';
         return;
     }
 
     if (!storeCodeRegex.test(storeCode)) {
         marketActivityStatusElement.textContent = '請輸入有效的5位數字商店碼。';
-        marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-red-600'; // Use className
+        marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-red-600';
         return;
     }
 
     totalMileage += selectedMarketProduct.mileage;
     totalCarbonReduction += selectedMarketProduct.carbonReduction;
     totalScore += selectedMarketProduct.points;
-
     updateStatsDisplay();
 
     const now = new Date();
@@ -1964,7 +1950,7 @@ function submitMarketActivity() {
         mileageInMeters: selectedMarketProduct.mileage,
         carbonReduction: selectedMarketProduct.carbonReduction,
         points: selectedMarketProduct.points,
-        storeCode: storeCode, // Save the store code
+        storeCode: storeCode,
         timestamp: timestamp
     };
     loggedActions.push(newLogEntry);
@@ -1972,25 +1958,20 @@ function submitMarketActivity() {
     renderLoggedActions();
 
     marketActivityStatusElement.textContent = `已記錄於 ${selectedMarketType.name} 消費 ${selectedMarketProduct.name} (商店碼: ${storeCode})！獲得 +${selectedMarketProduct.points} 積分。`;
-    marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-green-600'; // Use className
+    marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-green-600';
 
-    // Clear store code input
     if(marketStoreCodeInput) marketStoreCodeInput.value = '';
-
-    // Reset selections for next entry
     selectedMarketType = null;
     selectedMarketProduct = null;
     submitMarketActivityButton.disabled = true;
     marketTypeOptionsDiv.querySelectorAll('.market-option-button.selected').forEach(btn => btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'));
     productTypeOptionsDiv.querySelectorAll('.product-option-button.selected').forEach(btn => btn.classList.remove('selected', 'bg-purple-600', 'text-white', 'ring-2', 'ring-purple-700'));
 
-
-    // Go back to market type selection after a short delay, allowing user to see the message
     setTimeout(() => {
-        handleBackToMarketType(); // This will clear the product selection and hide the product step
+        handleBackToMarketType();
         marketActivityStatusElement.textContent = '您可以記錄下一筆消費，或關閉此視窗。';
-        marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-gray-700'; // Neutral status
-    }, 3000); // 3 seconds delay
+        marketActivityStatusElement.className = 'mt-4 text-sm font-semibold text-gray-700';
+    }, 3000);
 }
 
 // --- Photo Album Modal Functions ---
@@ -2017,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateActivityList();
     populateSelectableActionsList();
 
-    playerNameInput.addEventListener('input', saveData);
+    if (playerNameInput) playerNameInput.addEventListener('input', saveData);
 
     document.querySelectorAll('.transport-option').forEach(button => {
         button.addEventListener('click', () => {
@@ -2034,82 +2015,106 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // New Market Mileage Button Listener
-    if (marketMileageButton) {
-        marketMileageButton.addEventListener('click', showMarketSelectionModal);
-        console.log("Market mileage button listener added.");
-    }
+    // Market Mileage Button and Modal
+    if (marketMileageButton) marketMileageButton.addEventListener('click', showMarketSelectionModal);
     if (marketSelectionModal) {
-        marketSelectionModal.querySelector('.close-button').addEventListener('click', hideMarketSelectionModal);
+        const marketCloseButton = marketSelectionModal.querySelector('.close-button');
+        if (marketCloseButton) marketCloseButton.addEventListener('click', hideMarketSelectionModal);
         marketSelectionModal.addEventListener('click', (e) => { if (e.target === marketSelectionModal) hideMarketSelectionModal(); });
-        console.log("Market selection modal listeners added.");
     }
-    if (submitMarketActivityButton) {
-        submitMarketActivityButton.addEventListener('click', submitMarketActivity);
-        console.log("Submit market activity button listener added.");
-    }
-    if (backToMarketTypeButton) {
-        backToMarketTypeButton.addEventListener('click', handleBackToMarketType);
-        console.log("Back to market type button listener added.");
-    }
+    if (submitMarketActivityButton) submitMarketActivityButton.addEventListener('click', submitMarketActivity);
+    if (backToMarketTypeButton) backToMarketTypeButton.addEventListener('click', handleBackToMarketType);
 
-    // Photo Album Promo Button Listener
-    if (photoAlbumPromoButton) {
-        photoAlbumPromoButton.addEventListener('click', showPhotoAlbumModal);
-    }
+    // Photo Album Modal
+    if (photoAlbumPromoButton) photoAlbumPromoButton.addEventListener('click', showPhotoAlbumModal);
     if (photoAlbumModal) {
-        photoAlbumModal.querySelector('.close-button').addEventListener('click', hidePhotoAlbumModal);
+        const photoAlbumCloseButton = photoAlbumModal.querySelector('.close-button');
+        if (photoAlbumCloseButton) photoAlbumCloseButton.addEventListener('click', hidePhotoAlbumModal);
         photoAlbumModal.addEventListener('click', (e) => { if (e.target === photoAlbumModal) hidePhotoAlbumModal(); });
     }
 
-
-    calculateMileageButton.addEventListener('click', calculateTripMileage);
-    poiModal.querySelector('.close-button').addEventListener('click', hidePoiModal);
-    poiModal.addEventListener('click', (e) => { if (e.target === poiModal) hidePoiModal(); });
-    setAsStartButton.addEventListener('click', () => {
+    // POI Modal and related buttons
+    if (calculateMileageButton) calculateMileageButton.addEventListener('click', calculateTripMileage);
+    if (poiModal) {
+        const poiModalCloseButton = poiModal.querySelector('.close-button');
+        if (poiModalCloseButton) poiModalCloseButton.addEventListener('click', hidePoiModal);
+        poiModal.addEventListener('click', (e) => { if (e.target === poiModal) hidePoiModal(); });
+    }
+    if (setAsStartButton) setAsStartButton.addEventListener('click', () => {
         if (poiModal.currentPoi) { selectedStartPoi = poiModal.currentPoi; updateSelectedPointsDisplay(); hidePoiModal(); }
     });
-    setAsEndButton.addEventListener('click', () => {
+    if (setAsEndButton) setAsEndButton.addEventListener('click', () => {
         if (poiModal.currentPoi) { selectedEndPoi = poiModal.currentPoi; updateSelectedPointsDisplay(); hidePoiModal(); }
     });
-    submitPoiReviewButton.addEventListener('click', submitPoiReview);
+    if (submitPoiReviewButton) submitPoiReviewButton.addEventListener('click', submitPoiReview);
 
-    if (sroiOrderButtonPoi12) {
-        sroiOrderButtonPoi12.addEventListener('click', () => {
-            const poi12Data = pois.find(p => p.id === 'poi12');
-            if (poi12Data && poi12Data.sroiInfo) showSroiInfoModal(poi12Data.sroiInfo, poi12Data.name);
-        });
+    // SROI buttons
+    if (sroiOrderButtonPoi12) sroiOrderButtonPoi12.addEventListener('click', () => {
+        const poi12Data = pois.find(p => p.id === 'poi12');
+        if (poi12Data && poi12Data.sroiInfo) showSroiInfoModal(poi12Data.sroiInfo, poi12Data.name);
+    });
+    if (showSroiInfoButton) showSroiInfoButton.addEventListener('click', () => {
+        if (showSroiInfoButton.sroiInfo && showSroiInfoButton.poiName) showSroiInfoModal(showSroiInfoButton.sroiInfo, showSroiInfoButton.poiName);
+    });
+
+    // Activity Modal
+    if (participateActivityButton) participateActivityButton.addEventListener('click', showActivityModal);
+    if (activityModal) {
+        const activityModalCloseButton = activityModal.querySelector('.close-button');
+        if (activityModalCloseButton) activityModalCloseButton.addEventListener('click', hideActivityModal);
+        activityModal.addEventListener('click', (e) => { if (e.target === activityModal) hideActivityModal(); });
     }
-    if (showSroiInfoButton) {
-        showSroiInfoButton.addEventListener('click', () => {
-            if (showSroiInfoButton.sroiInfo && showSroiInfoButton.poiName) showSroiInfoModal(showSroiInfoButton.sroiInfo, showSroiInfoButton.poiName);
-        });
+    if (submitActivityLogButton) submitActivityLogButton.addEventListener('click', logActivity);
+
+    // Other buttons
+    if (logActionButton) logActionButton.addEventListener('click', logSustainableAction);
+    if (backToHomeButton) backToHomeButton.addEventListener('click', showHomepage);
+    if (changeTransportButton) changeTransportButton.addEventListener('click', showHomepage);
+    if (downloadDataButton) downloadDataButton.addEventListener('click', downloadTourismData);
+
+    // THSR Info Modal
+    if (thsrInfoModal) {
+        const thsrInfoModalCloseButton = thsrInfoModal.querySelector('.close-button');
+        if (thsrInfoModalCloseButton) thsrInfoModalCloseButton.addEventListener('click', hideThsrInfoModal);
+        thsrInfoModal.addEventListener('click', (e) => { if (e.target === thsrInfoModal) hideThsrInfoModal(); });
     }
 
-    participateActivityButton.addEventListener('click', showActivityModal);
-    activityModal.querySelector('.close-button').addEventListener('click', hideActivityModal);
-    activityModal.addEventListener('click', (e) => { if (e.target === activityModal) hideActivityModal(); });
-    submitActivityLogButton.addEventListener('click', logActivity);
-    logActionButton.addEventListener('click', logSustainableAction);
-    backToHomeButton.addEventListener('click', showHomepage);
-    changeTransportButton.addEventListener('click', showHomepage);
-    thsrInfoModal.querySelector('.close-button').addEventListener('click', hideThsrInfoModal);
-    thsrInfoModal.addEventListener('click', (e) => { if (e.target === thsrInfoModal) hideThsrInfoModal(); });
-    downloadDataButton.addEventListener('click', downloadTourismData);
-
-    // --- MODIFICATION: Ensure close button for logTripModal is correctly wired ---
+    // Log Trip Modal
     if (logTripModal) {
-        logTripModal.querySelector('.close-button').addEventListener('click', hideLogTripModal);
-        logTripModal.addEventListener('click', (e) => { if (e.target === logTripModal) hideLogTripModal(); });
+        const logTripCloseButton = logTripModal.querySelector('.close-button');
+        if (logTripCloseButton) {
+            logTripCloseButton.addEventListener('click', hideLogTripModal);
+        } else {
+            console.error('Log Trip Modal: Close button not found.');
+        }
+        logTripModal.addEventListener('click', (e) => {
+            if (e.target === logTripModal) {
+                hideLogTripModal();
+            }
+        });
+    } else {
+        console.error('Log Trip Modal: Element not found.');
     }
-    submitLogTripButton.addEventListener('click', submitLogTrip);
+    if (submitLogTripButton) {
+        submitLogTripButton.addEventListener('click', submitLogTrip);
+    } else {
+        console.error('Log Trip Modal: Submit button not found.');
+    }
 
+    // Taxi Info Modal
+    if (taxiInfoButton) taxiInfoButton.addEventListener('click', showTaxiInfoModal);
+    if (taxiInfoModal) {
+        const taxiInfoModalCloseButton = taxiInfoModal.querySelector('.close-button');
+        if (taxiInfoModalCloseButton) taxiInfoModalCloseButton.addEventListener('click', hideTaxiInfoModal);
+        taxiInfoModal.addEventListener('click', (e) => { if (e.target === taxiInfoModal) hideTaxiInfoModal(); });
+    }
 
-    taxiInfoButton.addEventListener('click', showTaxiInfoModal);
-    taxiInfoModal.querySelector('.close-button').addEventListener('click', hideTaxiInfoModal);
-    taxiInfoModal.addEventListener('click', (e) => { if (e.target === taxiInfoModal) hideTaxiInfoModal(); });
-    sroiInfoModal.querySelector('.close-button').addEventListener('click', hideSroiInfoModal);
-    sroiInfoModal.addEventListener('click', (e) => { if (e.target === sroiInfoModal) hideSroiInfoModal(); });
+    // SROI Info Modal
+    if (sroiInfoModal) {
+        const sroiInfoModalCloseButton = sroiInfoModal.querySelector('.close-button');
+        if (sroiInfoModalCloseButton) sroiInfoModalCloseButton.addEventListener('click', hideSroiInfoModal);
+        sroiInfoModal.addEventListener('click', (e) => { if (e.target === sroiInfoModal) hideSroiInfoModal(); });
+    }
 
     showHomepage();
     console.log("All event listeners set up. Initial homepage display triggered.");
