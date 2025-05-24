@@ -1,40 +1,37 @@
 // script.js
 
 // Import the functions you need from the SDKs you need
-// Firebase SDK version updated to 11.8.0 using CDN URLs
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-analytics.js";
-// Firestore is used in this script, so we need to import its functions as well
-import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 
 
 // --- Firebase Configuration ---
-// Your web app's Firebase configuration - Updated
+// Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCBO_KuvKhoadsYV8DMukGrq6I8mMkS1a4",
-  authDomain: "corporate-sustainability-1.firebaseapp.com",
-  projectId: "corporate-sustainability-1",
-  storageBucket: "corporate-sustainability-1.firebasestorage.app",
-  messagingSenderId: "696147135831",
-  appId: "1:696147135831:web:979f185e9973a4ac214212",
-  measurementId: "G-KCJNCM1R9B"
+    apiKey: "AIzaSyCEH65YbNirj_IRmtsIJZS-HNEbsRBBsSQ", // Your Firebase API Key
+    authDomain: "sustainable-tourism-65025.firebaseapp.com",
+    projectId: "sustainable-tourism-65025",
+    storageBucket: "sustainable-tourism-65025.firebasestorage.app",
+    messagingSenderId: "781325465882",
+    appId: "1:781325465882:web:9435b02bd618f0c16814a3",
+    measurementId: "G-SZJ1RX5QS4"
 };
 
 // Initialize Firebase
 let app;
-let db; // Firestore database instance
+let db;
 let analytics;
 
 try {
     app = initializeApp(firebaseConfig);
-    analytics = getAnalytics(app);
-    db = getFirestore(app); // Initialize Firestore
-    console.log("Firebase initialized successfully with new config (v11.8.0 CDN).");
+    db = getFirestore(app); // Get a reference to the Firestore service using the new method
+    analytics = getAnalytics(app); // Get a reference to the Analytics service using the new method
+    console.log("Firebase initialized successfully."); // Debugging line
 } catch (error) {
-    console.error("Error initializing Firebase with new config:", error);
+    console.error("Error initializing Firebase:", error); // Debugging line
+    // Update network stats status on Firebase initialization error
     const networkStatsStatusElement = document.getElementById('network-stats-status');
     if (networkStatsStatusElement) {
         networkStatsStatusElement.textContent = `Firebase 初始化失敗: ${error.message}. 無法載入網路統計。`;
@@ -76,18 +73,20 @@ const pois = [
     { id: 'poi5', name: '森林小白宮', coords: { lat: 23.779408, lng: 120.844019 }, icon: '🏠', description: '接駁、共乘、摩托。需預約。\n\n完成單一活動可獲得永續與環境教育任務點數10點。\n\n小白宮森林生態導覽，親子活動(彩繪/木藝/親子皮影)。', image: '', socialLink: 'https://wild-kids-studio.waca.tw/' },
     { id: 'poi6', name: '瑪路馬咖啡莊園', coords: { lat: 23.778239, lng: 120.843859 }, icon: '☕', description: '接駁、共乘、摩托。\n\n活動資訊: 咖啡座、咖啡園導覽。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/people/%E9%A6%AC%E8%B7%AF%E7%91%AA%E5%92%96%E5%95%A1%E8%8E%8A%E5%9C%92/100063961898841/' },
     { id: 'poi7', name: '指令教育農場', coords: { lat: 23.802776, lng: 120.864715 }, icon: '👆', description: '台灣好行、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/FarmCMD/', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_7', formLink: 'YOUR_FORM_LINK_7', lineId: 'https://line.me/ti/g2/HFRcE4eII1eQ761y0Zs3QEvs70saIQ-dHYbYgA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default' } }, // Updated LINE ID
-    { id: 'poi8', name: '明揚養蜂', coords: { lat: 23.803787, lng: 120.862401 }, icon: '🐝', description: '共乘、台灣好行、摩托。\n\n活動資訊: 育蜂場導覽、生態導覽、蜂蜜食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/MingYangBee/?locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_8', formLink: 'YOUR_FORM_LINK_8', lineId: 'YOUR_LINE_ID_8' } }, // Added sroiInfo
+    { id: 'poi8', name: '明揚養蜂', coords: { lat: 23.803787, lng: 120.862401 }, icon: '🐝', description: '共乘、台灣好行、摩托。\n\n活動資訊: 育蜂場導覽、生態導覽、蜂蜜食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/MingYangBee/?locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_8', formLink: 'YOUR_FORM_LINK_8', lineId: 'https://line.me/ti/g2/VuGeDsA2K8tPEJ9JOElK70LbUmGk8dW_7Q2zxA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default' } }, // Added sroiInfo
     { id: 'poi9', name: '蛇窯文化園區', coords: { lat: 23.801177, lng: 120.864479 }, icon: '🏺', description: '共乘、台灣好行。\n\n活動資訊: 購票入園，完成食農器皿文化參觀可獲得永續與環境教育點數10點。', image: '', socialLink: 'https://www.facebook.com/sskshop/?locale=zh_TW' },
-    { id: 'poi10', name: '雨社山下', coords: { lat: 23.790644, lng: 120.896569 }, icon: '🥒', description: '接駁、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/profile.php?id=61557727713841&locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_10', formLink: 'YOUR_FORM_LINK_10', lineId: 'YOUR_LINE_ID_10' } }, // Added sroiInfo
-    { id: 'poi11', name: '阿爾喜莊園', coords: { lat: 23.803119, lng: 120.926340 }, icon: '🍋', description: '接駁、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育、農業循環經濟教學。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/AHEIemon?locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_11', formLink: 'YOUR_FORM_LINK_11', lineId: 'YOUR_LINE_ID_11' } }, // Added sroiInfo
+    { id: 'poi10', name: '雨社山下', coords: { lat: 23.790644, lng: 120.896569 }, icon: '🥒', description: '接駁、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/profile.php?id=61557727713841&locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_10', formLink: 'YOUR_FORM_LINK_10', lineId: 'https://line.me/ti/g2/ltdgi_rY8K-frnjS9Q0n0n2vGSO8uw8m5uGUWA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default' } }, // Added sroiInfo
+    { id: 'poi11', name: '阿爾喜莊園', coords: { lat: 23.803119, lng: 120.926340 }, icon: '🍋', description: '接駁、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育、農業循環經濟教學。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/AHEIemon?locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_11', formLink: 'YOUR_FORM_LINK_11', lineId: 'https://line.me/ti/g2/f2JhyAIKmKvProOMzM2z4Mb-6ogaJOOsPT0jug?utm_source=invitation&utm_medium=link_copy&utm_campaign=default' } }, // Added sroiInfo
     // Re-added sroiInfo for poi12
-    { id: 'poi12', name: '湧健酪梨園', coords: { lat: 23.725349, lng: 120.846123 }, icon: '🥑', description: '台灣好行、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/profile.php?id=100085673588842&locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_12', formLink: 'YOUR_FORM_LINK_12', lineId: 'YOUR_LINE_ID_12' } }, // Re-added sroiInfo for poi12
+    { id: 'poi12', name: '湧健酪梨園', coords: { lat: 23.725349, lng: 120.846123 }, icon: '🥑', description: '台灣好行、共乘、摩托。\n\n活動資訊: 農場導覽、生態導覽、食農教育。完成單一活動可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://www.facebook.com/profile.php?id=100085673588842&locale=zh_TW', sroiInfo: { reportLink: 'YOUR_REPORT_LINK_12', formLink: 'YOUR_FORM_LINK_12', lineId: 'https://line.me/ti/g2/PIlIHjGJgO-mmn3JvqgCJ9_mPY7Aoeqg8VOEDg?utm_source=invitation&utm_medium=link_copy&utm_campaign=default' } }, // Re-added sroiInfo for poi12
     { id: 'poi13', name: '謝家肉圓', coords: { lat: 23.817521, lng: 120.853831 }, icon: '🥟', description: '步行、摩托、台灣好行。營業時間 11:00–17:00。\n\n在地人巷內70年老店。', image: '', socialLink: 'https://www.facebook.com/profile.php?id=100054428473137&locale=zh_TW' },
     { id: 'poi14', name: '機車貓聯盟', coords: { lat: 23.810883, lng: 120.855798 }, icon: '🍚', description: '共乘、摩托、台灣好行。營業時間 11:00–17:00。\n\n無菜單料理店，50%以上使用在地食材，任一消費金額可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://m.facebook.com/機車貓聯盟-552637305127422/' }, // Added social link (using the one from search result)
     { id: 'poi15', name: '二坪大觀冰店', coords: { lat: 23.813627, lng: 120.859651 }, icon: '🍦', description: '共乘、摩托。\n\n在地推薦古早味枝仔冰。台電員工福利社60年老店。', image: '', socialLink: 'https://www.facebook.com/2pinIce/' },
     { id: 'poi16', name: '水里里山村', coords: { lat: 23.813459, lng: 120.853787 }, icon: '🏡', description: '共乘、摩托。\n\n在地推鑑環保旅宿，任一消費金額可獲得永續與環境教育任務點數10點。', image: '', socialLink: 'https://tg-ecohotel.com/' }, // Added website link
-    // Updated description for poi17 and removed isMarketDirect flag
-    { id: 'poi17', name: '水里星光市集', coords: { lat: 23.813636, lng: 120.850816 }, icon: '💡', description: '參加”逛市集增里程”地產地銷最減碳，支持在地消費獲得減碳量。\n\n本年度預計於星光市集舉辦「食農教育」活動，場次及內容請洽水里鄉商圈創生共好協會。', image: '', socialLink: 'https://www.facebook.com/p/%E6%B0%B4%E9%87%8C%E9%84%89%E5%95%86%E5%9C%88%E5%89%B5%E7%94%9F%E5%85%B1%E5%A5%BD%E5%8D%94%E6%9C%83-100076220760859/?locale=zh_TW', isNew: true, marketScheduleLink: 'https://www.facebook.com/photo/?fbid=2583695705169366&set=pcb.2583695981835995' }
+    // Updated description for poi17
+    { id: 'poi17', name: '水里星光市集', coords: { lat: 23.813636, lng: 120.850816 }, icon: '💡', description: '參加”逛市集增里程”地產地銷最減碳，支持在地消費獲得減碳量。\n\n本年度預計於星光市集舉辦「食農教育」活動，場次及內容請洽水里鄉商圈創生共好協會。', image: '', socialLink: 'https://www.facebook.com/p/%E6%B0%B4%E9%87%8C%E9%84%89%E5%95%86%E5%9C%88%E5%89%B5%E7%94%9F%E5%85%B1%E5%A5%BD%E5%8D%94%E6%9C%83-100076220760859/?locale=zh_TW', isNew: true, marketScheduleLink: 'https://www.facebook.com/photo/?fbid=2583695705169366&set=pcb.2583695981835995' },
+    // New POI: 森音
+    { id: 'poi18', name: '森音', coords: { lat: 23.742587, lng: 120.866954 }, icon: '🎶', description: '接駁、摩托、私家車。需預約。\n\n完成單一活動可獲得永續與環境教育任務點數10點。\n\n森音森林導覽，親子活動(咖啡座/木藝上板/森林育樂/畫廊)。', image: '', socialLink: 'https://www.facebook.com/morinooto111' }
 ];
 
  // Sustainable Actions Data with points
@@ -209,7 +208,6 @@ const loggedActionsListElement = document.getElementById('logged-actions-list');
 const thsrInfoModal = document.getElementById('thsr-info-modal'); // THSR Info Modal
 const selectableActionsListElement = document.getElementById('selectable-actions-list'); // Element to display selectable actions
 const downloadDataButton = document.getElementById('download-data-button'); // New download button element
-const uploadCsvButton = document.getElementById('upload-csv-button'); // New upload CSV button element
 const activityModalImage = document.getElementById('activity-modal-image'); // Get the activity modal image element
 
 // New DOM elements for Log Trip Modal
@@ -262,79 +260,74 @@ const marketActivityStatusElement = document.getElementById('market-activity-sta
 const backToMarketTypeButton = document.getElementById('back-to-market-type-button');
 const marketStoreCodeInput = document.getElementById('market-store-code'); // Added for store code
 
+// New Photo Album Modal DOM Elements
+const photoAlbumPromoButton = document.getElementById('photo-album-promo-button');
+const photoAlbumModal = document.getElementById('photo-album-modal');
+
 
 // --- Local Storage ---
 const localStorageKey = 'shuilSustainableTourismData_v2.2'; // Updated key for versioning
 const localStorageActionsKey = 'shuilSustainableTourismActions_v2.2'; // Updated key for versioning
 
 function loadData() {
-    console.log("Loading data from localStorage...");
+    console.log("Loading data from localStorage..."); // Debugging line
     const data = localStorage.getItem(localStorageKey);
-    let parsedData = null; 
-
     if (data) {
-        try {
-            parsedData = JSON.parse(data);
-        } catch (e) {
-            console.error("Error parsing localStorage data:", e);
-            localStorage.removeItem(localStorageKey); 
-        }
-    }
-
-    if (parsedData) { 
+        const parsedData = JSON.parse(data);
         totalMileage = parsedData.totalMileage || 0;
         totalCarbonReduction = parsedData.totalCarbonReduction || 0;
         totalScore = parsedData.totalScore || 0;
-        playerName = parsedData.playerName || '';
-        playerCode = parsedData.playerCode || '';
+        playerName = parsedData.playerName || ''; // Load player name
+        playerCode = parsedData.playerCode || ''; // Load player code
+
+        // If player code is not loaded (first time or cleared data), generate a new one
         if (!playerCode) {
             playerCode = generateRandomCode();
-            console.log("Generated new player code (was missing in parsed data):", playerCode);
+            console.log("Generated new player code:", playerCode); // Debugging line
         } else {
-             console.log("Loaded player code:", playerCode);
+             console.log("Loaded player code:", playerCode); // Debugging line
         }
+
+
         updateStatsDisplay();
-        document.getElementById('stats-load-status').textContent = '已成功載入之前的旅遊數據。';
-        document.getElementById('stats-load-status').classList.remove('text-gray-600');
-        document.getElementById('stats-load-status').classList.add('text-green-600');
+         document.getElementById('stats-load-status').textContent = '已成功載入之前的旅遊數據。'; // Update status message
+         document.getElementById('stats-load-status').classList.remove('text-gray-600');
+         document.getElementById('stats-load-status').classList.add('text-green-600');
+
     } else {
+         // If no data at all, generate a new code and initialize stats
          playerCode = generateRandomCode();
          totalMileage = 0;
          totalCarbonReduction = 0;
          totalScore = 0;
          playerName = '';
-         console.log("No valid data found in localStorage or data was corrupted, generated new player code and initialized stats:", playerCode);
-         updateStatsDisplay();
-         document.getElementById('stats-load-status').textContent = '未發現先前的旅遊數據或數據已重設，已建立新的永續旅者紀錄。';
+         console.log("No data found, generated new player code and initialized stats:", playerCode); // Debugging line
+         updateStatsDisplay(); // Update display with initial stats and new code
+         document.getElementById('stats-load-status').textContent = '未發現先前的旅遊數據，已建立新的永續旅者紀錄。'; // Update status message
          document.getElementById('stats-load-status').classList.remove('text-gray-600');
          document.getElementById('stats-load-status').classList.add('text-blue-600');
     }
 
+    // Load action logs
+    console.log("Loading action logs from localStorage..."); // Debugging line
     const actionsData = localStorage.getItem(localStorageActionsKey);
     if (actionsData) {
-        try {
-            loggedActions = JSON.parse(actionsData);
-            console.log("Loaded action logs:", loggedActions);
-            renderLoggedActions();
-        } catch (e) {
-            console.error("Error parsing localStorage actions data:", e);
-            localStorage.removeItem(localStorageActionsKey); 
-            loggedActions = [];
-            loggedActionsListElement.innerHTML = '<p class="text-gray-500 text-center">行動紀錄讀取錯誤，已重設。</p>';
-        }
+        loggedActions = JSON.parse(actionsData);
+        console.log("Loaded action logs:", loggedActions); // Debugging line
+        renderLoggedActions(); // Display loaded actions
     } else {
-         loggedActions = [];
-         loggedActionsListElement.innerHTML = '<p class="text-gray-500 text-center">尚無行動紀錄</p>';
-         console.log("No action logs found.");
+         loggedActions = []; // Initialize as empty array if no data
+         loggedActionsListElement.innerHTML = '<p class="text-gray-500 text-center">尚無行動紀錄</p>'; // Show empty message if no data
+         console.log("No action logs found."); // Debugging line
     }
+     saveData(); // Save data including the potentially new code and initialized actions
+     console.log("Data loading complete."); // Debugging line
 
-    saveData(); 
-    console.log("Data loading function complete.");
-
+     // Fetch and display network-wide total (only if Firebase initialized successfully)
     if (db) {
         fetchNetworkTotalCarbonReduction();
     } else {
-         console.warn("Firebase db not initialized, cannot fetch network total.");
+         console.warn("Firebase not initialized, cannot fetch network total.");
     }
 }
 
@@ -371,18 +364,12 @@ function saveData() {
 }
 
 function updateStatsDisplay() {
-    totalMileageSpan.textContent = `${(totalMileage / 1000).toFixed(2)} km`;
+    totalMileageSpan.textContent = `${(totalMileage / 1000).toFixed(2)} km`; // Display in km
     totalCarbonReductionSpan.textContent = `${totalCarbonReduction.toFixed(2)} g`;
     totalScoreSpan.textContent = totalScore;
-    playerNameInput.value = playerName;
-
-    console.log("Updating player code display. Player code:", playerCode, "Element:", playerCodeDisplay); // DEBUGGING LINE
-    if (playerCodeDisplay) {
-        playerCodeDisplay.textContent = playerCode;
-    } else {
-        console.error("playerCodeDisplay element not found!");
-    }
-    console.log("Stats display updated.");
+    playerNameInput.value = playerName; // Set player name input value
+    playerCodeDisplay.textContent = playerCode; // Display player code
+    console.log("Stats display updated."); // Debugging line
 }
 
 // --- Generate Random Code ---
@@ -899,7 +886,7 @@ function populatePoiList() {
         // Add navigation link icon
         const navigationLinkElement = document.createElement('a');
         // Use Google Maps navigation URL format
-        navigationLinkElement.href = `https://www.google.com/maps/dir/?api=1&destination=${poi.coords.lat},${poi.coords.lng}`;
+        navigationLinkElement.href = `https://www.google.com/maps/search/?api=1&query=$${poi.coords.lat},${poi.coords.lng}`; // Correct Google Maps link
         navigationLinkElement.target = "_blank"; // Open in new tab (will open Google Maps app if installed)
         navigationLinkElement.classList.add('navigation-icon', 'text-gray-600', 'hover:text-emerald-500'); // Tailwind styling
         navigationLinkElement.innerHTML = '<i class="fas fa-compass fa-lg"></i>'; // Compass icon, larger
@@ -1627,8 +1614,8 @@ function submitLogTrip() {
         button.classList.remove('selected', 'bg-orange-300', 'border-orange-600', 'text-orange-900', 'font-semibold'); // Tailwind for selection
     });
 
-     // --- FIX: Close the modal on successful submission ---
-     // Adding a slight delay before closing can help the user see the success message
+
+     // --- MODIFICATION: Close the modal on successful submission with a delay ---
      setTimeout(() => {
         hideLogTripModal();
      }, 1500); // Close modal after 1.5 seconds
@@ -1743,7 +1730,7 @@ function downloadTourismData() {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>台聚集團企業員工低碳永續旅遊數據報告 V2.2</title>
+            <title>水里永續旅遊數據報告 V2.2</title>
             <style>
                 body { font-family: 'Noto Sans TC', sans-serif; line-height: 1.6; padding: 20px; margin: 0; background-color: #f9f9f9; color: #333; }
                 h1, h2 { color: #1b5e20; }
@@ -1761,7 +1748,7 @@ function downloadTourismData() {
         </head>
         <body>
             <div class="container">
-                <h1>台聚集團企業員工低碳永續旅遊數據報告 V2.2</h1>
+                <h1>水里永續旅遊數據報告 V2.2</h1>
 
                 <div class="stats">
                     <h2>您的旅遊統計</h2>
@@ -1824,7 +1811,7 @@ function downloadTourismData() {
     // Create a download link
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `台聚集團永續旅遊數據_${playerCode}_V2.2.html`; // Change filename extension to .html and include player code and version
+    a.download = `水里永續旅遊數據_${playerCode}_V2.2.html`; // Change filename extension to .html and include player code and version
     console.log("Download link created:", a.href, "Filename:", a.download); // Debugging line
 
 
@@ -1838,146 +1825,6 @@ function downloadTourismData() {
     URL.revokeObjectURL(a.href);
      console.log("Download data removed and object URL revoked."); // Debugging line
 }
-
-// --- Upload CSV Data ---
-function uploadCsvData() {
-    console.log("Upload CSV data button clicked.");
-
-    if (loggedActions.length === 0) {
-        alert('尚無行動紀錄可上傳。');
-        console.warn("No actions to upload.");
-        return;
-    }
-
-    // Define CSV Headers
-    const headers = [
-        "類型", "時間戳", "永續旅者姓名", "隨機碼", "總里程(km)", "總減碳量(g)", "總分數",
-        "行動內容/活動名稱/起點景點/市集類型",
-        "選擇的行動/活動內容/終點景點/消費項目",
-        "交通方式", "交通圖示", "里程(m)", "減碳量(g)", "消費金額", "審核碼", "商店碼", "點數"
-    ];
-
-    let csvContent = headers.join(",") + "\n";
-
-    // Prepare data rows
-    const sortedLogs = [...loggedActions].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Sort by oldest first for CSV
-
-    sortedLogs.forEach(log => {
-        let row = [];
-        // Common data for all log types
-        row.push(log.type || '');
-        row.push(log.timestamp || '');
-        row.push(playerNameInput.value.trim() || '');
-        row.push(playerCode || '');
-        row.push((totalMileage / 1000).toFixed(2) || '0');
-        row.push(totalCarbonReduction.toFixed(2) || '0');
-        row.push(totalScore || '0');
-
-
-        // Log-specific data - ensure quotes for fields that might contain commas or newlines
-        switch (log.type) {
-            case 'action':
-                row.push(`"${log.text || ''}"`); //行動內容
-                row.push(`"${log.actions ? log.actions.join('; ') : ''}"`); //選擇的行動 (use ; as separator within cell)
-                row.push(''); //交通方式
-                row.push(''); //交通圖示
-                row.push(''); //里程(m)
-                row.push(''); //減碳量(g)
-                row.push(''); //消費金額
-                row.push(''); //審核碼
-                row.push(''); //商店碼
-                row.push(log.points || '0');
-                break;
-            case 'activity':
-                row.push(`"${log.activityName || ''}"`); //活動名稱
-                row.push(`"${log.content || ''}"`); //活動內容
-                row.push(''); //交通方式
-                row.push(''); //交通圖示
-                row.push(''); //里程(m)
-                row.push(''); //減碳量(g)
-                row.push(''); //消費金額
-                row.push(''); //審核碼
-                row.push(''); //商店碼
-                row.push(log.points || '0');
-                break;
-            case 'trip_to_poi': // Manual trip log
-                row.push(`"${log.poiName || ''}"`); //起點景點 (assuming it's the destination for manual log)
-                row.push(''); //終點景點
-                row.push(log.transportName || '');
-                row.push(log.transportIcon || '');
-                row.push(log.mileageInMeters || '0');
-                row.push(log.carbonReduction ? log.carbonReduction.toFixed(2) : '0');
-                row.push(''); //消費金額
-                row.push(''); //審核碼
-                row.push(''); //商店碼
-                row.push(log.points || '0');
-                break;
-            case 'poi_review':
-                row.push(`"${log.poiName || ''}"`); //景點
-                row.push(''); //消費項目
-                row.push(''); //交通方式
-                row.push(''); //交通圖示
-                row.push(''); //里程(m)
-                row.push(''); //減碳量(g)
-                row.push(log.consumption || '0');
-                row.push(log.reviewCode || '');
-                row.push(''); //商店碼
-                row.push(log.points || '0');
-                break;
-            case 'trip_calculation': // Map trip log
-                row.push(`"${log.startPoiName || ''}"`); //起點景點
-                row.push(`"${log.endPoiName || ''}"`); //終點景點
-                row.push(log.transportName || '');
-                row.push(log.transportIcon || '');
-                row.push(log.mileageInMeters || '0');
-                row.push(log.carbonReduction ? log.carbonReduction.toFixed(2) : '0');
-                row.push(''); //消費金額
-                row.push(''); //審核碼
-                row.push(''); //商店碼
-                row.push(log.points || '0');
-                break;
-            case 'market_visit':
-                row.push(`"${log.marketTypeName || ''}"`); //市集類型
-                row.push(`"${log.productName || ''} (${log.productIcon || ''})"`); //消費項目
-                row.push(''); //交通方式
-                row.push(''); //交通圖示
-                row.push(log.mileageInMeters || '0'); //增加里程
-                row.push(log.carbonReduction ? log.carbonReduction.toFixed(2) : '0'); //估計減碳
-                row.push(''); //消費金額
-                row.push(''); //審核碼
-                row.push(log.storeCode || ''); //商店碼
-                row.push(log.points || '0');
-                break;
-            default:
-                // Add empty cells for remaining columns if type is unknown
-                for (let i = 0; i < 10; i++) row.push('');
-                break;
-        }
-        csvContent += row.join(",") + "\n";
-    });
-
-    console.log("--- CSV Data ---");
-    console.log(csvContent);
-    console.log("--- End CSV Data ---");
-
-    // Placeholder for actual upload logic
-    // For a real application, you would use fetch() or XMLHttpRequest to send `csvContent`
-    // to a server-side script that would then save it to a CSV file or database.
-    // Example:
-    // fetch('/upload-endpoint', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'text/csv',
-    //     },
-    //     body: csvContent
-    // })
-    // .then(response => response.json())
-    // .then(data => console.log('Upload successful:', data))
-    // .catch(error => console.error('Upload error:', error));
-
-    alert('CSV 資料已生成並輸出到控制台。請查看開發者工具中的控制台。\n實際的上傳功能需要後端伺服器支援。');
-}
-
 
  // --- Market Selection Modal Functions ---
 function showMarketSelectionModal() {
@@ -2146,6 +1993,21 @@ function submitMarketActivity() {
     }, 3000); // 3 seconds delay
 }
 
+// --- Photo Album Modal Functions ---
+function showPhotoAlbumModal() {
+    console.log("Showing photo album modal.");
+    if (photoAlbumModal) {
+        photoAlbumModal.classList.remove('hidden');
+    }
+}
+
+function hidePhotoAlbumModal() {
+    console.log("Hiding photo album modal.");
+    if (photoAlbumModal) {
+        photoAlbumModal.classList.add('hidden');
+    }
+}
+
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -2191,6 +2053,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Back to market type button listener added.");
     }
 
+    // Photo Album Promo Button Listener
+    if (photoAlbumPromoButton) {
+        photoAlbumPromoButton.addEventListener('click', showPhotoAlbumModal);
+    }
+    if (photoAlbumModal) {
+        photoAlbumModal.querySelector('.close-button').addEventListener('click', hidePhotoAlbumModal);
+        photoAlbumModal.addEventListener('click', (e) => { if (e.target === photoAlbumModal) hidePhotoAlbumModal(); });
+    }
+
 
     calculateMileageButton.addEventListener('click', calculateTripMileage);
     poiModal.querySelector('.close-button').addEventListener('click', hidePoiModal);
@@ -2225,11 +2096,15 @@ document.addEventListener('DOMContentLoaded', () => {
     thsrInfoModal.querySelector('.close-button').addEventListener('click', hideThsrInfoModal);
     thsrInfoModal.addEventListener('click', (e) => { if (e.target === thsrInfoModal) hideThsrInfoModal(); });
     downloadDataButton.addEventListener('click', downloadTourismData);
-    uploadCsvButton.addEventListener('click', uploadCsvData); // Added event listener for new button
 
-    logTripModal.querySelector('.close-button').addEventListener('click', hideLogTripModal);
-    logTripModal.addEventListener('click', (e) => { if (e.target === logTripModal) hideLogTripModal(); });
+    // --- MODIFICATION: Ensure close button for logTripModal is correctly wired ---
+    if (logTripModal) {
+        logTripModal.querySelector('.close-button').addEventListener('click', hideLogTripModal);
+        logTripModal.addEventListener('click', (e) => { if (e.target === logTripModal) hideLogTripModal(); });
+    }
     submitLogTripButton.addEventListener('click', submitLogTrip);
+
+
     taxiInfoButton.addEventListener('click', showTaxiInfoModal);
     taxiInfoModal.querySelector('.close-button').addEventListener('click', hideTaxiInfoModal);
     taxiInfoModal.addEventListener('click', (e) => { if (e.target === taxiInfoModal) hideTaxiInfoModal(); });
