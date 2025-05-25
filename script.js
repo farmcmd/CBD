@@ -246,6 +246,7 @@ const showSroiInfoButton = document.getElementById('show-sroi-info-button'); // 
 // New DOM element for network total carbon reduction display
 const networkTotalCarbonReductionElement = document.getElementById('network-total-carbon-reduction');
 const networkStatsStatusElement = document.getElementById('network-stats-status'); // Status for network stats
+const treesPlantedCountElement = document.getElementById('trees-planted-count'); // For tree display
 
 // New Market Modal DOM Elements
 const marketMileageButton = document.getElementById('market-mileage-button');
@@ -430,6 +431,9 @@ async function fetchNetworkTotalCarbonReduction() {
           networkStatsStatusElement.textContent = 'Firebase 未初始化。';
           networkStatsStatusElement.classList.remove('text-gray-600', 'text-green-600');
           networkStatsStatusElement.classList.add('text-red-600');
+          if (treesPlantedCountElement) {
+              treesPlantedCountElement.textContent = '0';
+          }
           return;
      }
 
@@ -465,6 +469,13 @@ async function fetchNetworkTotalCarbonReduction() {
         networkStatsStatusElement.classList.add('text-green-600');
         console.log("Network total carbon reduction calculated and displayed:", networkTotalCarbonReduction, "g"); // Debugging line
 
+        // Calculate and display number of trees
+        const gramsPerTree = 10000000; // 10 tons = 10 * 1000 kg * 1000 g = 10,000,000 g
+        const treesPlanted = Math.floor(networkTotalCarbonReduction / gramsPerTree);
+        if (treesPlantedCountElement) {
+            treesPlantedCountElement.textContent = treesPlanted;
+        }
+
 
     } catch (e) {
         console.error("Error fetching network total carbon reduction from Firebase: ", e); // Debugging line
@@ -473,6 +484,9 @@ async function fetchNetworkTotalCarbonReduction() {
         networkStatsStatusElement.textContent = '無法載入網路統計數據。';
         networkStatsStatusElement.classList.remove('text-gray-600', 'text-green-600', 'text-blue-600');
         networkStatsStatusElement.classList.add('text-red-600');
+        if (treesPlantedCountElement) {
+            treesPlantedCountElement.textContent = '0'; // Reset to 0 on error
+        }
     }
 }
 
