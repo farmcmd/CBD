@@ -50,15 +50,15 @@ try {
 let transportData = {
     // Added metersPerPoint for score calculation based on distance
     // Corrected carbon reduction values based on user feedback
-    bike: { name: '腳踏車', icon: '🚲', carbonReductionPer10km: 350, travelMode: null, metersPerPoint: 10000 }, // 10km = 10000m
-    walk: { name: '步行', icon: '🚶‍♂️', carbonReductionPer10km: 400, travelMode: null, metersPerPoint: 8000 },   // 8km = 8000m
-    bus_train: { name: '共乘巴士 (公車/火車/遊覽巴士)', icon: '🚌', carbonReductionPer10km: 300, travelMode: null, metersPerPoint: 15000 }, // 15km = 15000m
-    carpool_2_moto: { name: '私家車共乘 2 人 / 摩托車', icon: '🏍️🚗', carbonReductionPer10km: 100, travelMode: null, metersPerPoint: 25000 }, // 25km = 25000m
-    carpool_3: { name: '私家車共乘 3 人', icon: '🚗', carbonReductionPer10km: 120, travelMode: null, metersPerPoint: 20000 }, // 20km = 20000m
-    carpool_4: { name: '私家車共乘 4 人', icon: '🚗', carbonReductionPer10km: 150, travelMode: null, metersPerPoint: 18000 }, // 18km = 18000m
-    carpool_5: { name: '私家車共乘 5 人', icon: '🚗', carbonReductionPer10km: 200, travelMode: null, metersPerPoint: 16000 }, // 16km = 16000m
-    thsr_haoxing: { name: '高鐵假期x台灣好行', icon: '🚄🚌', carbonReductionPer10km: 0, travelMode: null, metersPerPoint: Infinity } // THSR doesn't get points from distance in this model
-    // Taxi info is not included here as it's not for mileage calculation
+    bike: { name: '腳踏車', icon: '🚲', carbonReductionPer10km: 350, travelMode: null, metersPerPoint: 10000, benefits: '彈性高、健身、深度體驗' }, // 10km = 10000m
+    walk: { name: '步行', icon: '🚶‍♂️', carbonReductionPer10km: 400, travelMode: null, metersPerPoint: 8000, benefits: '最低碳、細細品味、健康' },   // 8km = 8000m
+    bus_train: { name: '共乘巴士', subName: '(公車/火車/遊覽巴士)', icon: '🚌', carbonReductionPer10km: 300, travelMode: null, metersPerPoint: 15000, benefits: '輕鬆便利、減少交通壓力' }, // 15km = 15000m
+    carpool_2_moto: { name: '共乘2人/摩托車', icon: '🏍️🚗', carbonReductionPer10km: 100, travelMode: null, metersPerPoint: 25000, benefits: '分攤費用、減少車輛數' }, // 25km = 25000m
+    carpool_3: { name: '私家車共乘 3 人', icon: '🚗', carbonReductionPer10km: 120, travelMode: null, metersPerPoint: 20000, benefits: '更有效率的共乘' }, // 20km = 20000m
+    carpool_4: { name: '私家車共乘 4 人', icon: '🚗', carbonReductionPer10km: 150, travelMode: null, metersPerPoint: 18000, benefits: '顯著減少碳排' }, // 18km = 18000m
+    carpool_5: { name: '私家車共乘 5 人', icon: '🚗', carbonReductionPer10km: 200, travelMode: null, metersPerPoint: 16000, benefits: '最佳共乘效率' }, // 16km = 16000m
+    thsr_haoxing: { name: '高鐵假期x台灣好行', icon: '🚄🚌', carbonReductionPer10km: 0, travelMode: null, metersPerPoint: Infinity, benefits: '輕鬆串聯城鄉', special: true, details: '減碳數據: 請參考專案說明' }, // THSR doesn't get points from distance in this model
+    taxi: { name: '我要預約多元計程車導覽旅遊', icon: '🚕', special: true, details: '點擊查看資訊' }
 };
 
 
@@ -162,6 +162,8 @@ let networkTotalCarbonReduction = 0;
 let selectedMarketType = null;
 let selectedMarketProduct = null;
 
+let activelyDisplayedTransportKey = null; // New: To track the transport details shown in the right panel
+
 
 // --- DOM Elements ---
 const homepageSection = document.getElementById('homepage');
@@ -263,6 +265,11 @@ const marketStoreCodeInput = document.getElementById('market-store-code'); // Ad
 // New Photo Album Modal DOM Elements
 const photoAlbumPromoButton = document.getElementById('photo-album-promo-button');
 const photoAlbumModal = document.getElementById('photo-album-modal');
+
+// New DOM elements for V5 layout
+const transportListSidebar = document.getElementById('transport-list-sidebar');
+const transportDetailsContent = document.getElementById('transport-details-content');
+const goToMissionButton = document.getElementById('go-to-mission-button');
 
 
 // --- Local Storage ---
@@ -1989,6 +1996,75 @@ function hidePhotoAlbumModal() {
     }
 }
 
+// --- V5: New functions for transport card display ---
+function populateTransportListSidebar() {
+    if (!transportListSidebar) return;
+    transportListSidebar.innerHTML = ''; // Clear existing items
+
+    Object.keys(transportData).forEach(key => {
+        const transport = transportData[key];
+        const listItem = document.createElement('div');
+        listItem.className = 'transport-list-item p-3 bg-green-50 rounded-lg shadow hover:bg-green-100 cursor-pointer flex items-center transition-all duration-200 ease-in-out';
+        listItem.dataset.transportKey = key;
+        listItem.innerHTML = `
+            <span class="text-2xl mr-3">${transport.icon}</span>
+            <span class="font-semibold text-sm">${transport.name}</span>
+        `;
+        listItem.addEventListener('click', () => displayTransportDetails(key));
+        transportListSidebar.appendChild(listItem);
+    });
+}
+
+function displayTransportDetails(transportKey) {
+    if (!transportDetailsContent || !transportData[transportKey]) return;
+
+    const transport = transportData[transportKey];
+    activelyDisplayedTransportKey = transportKey; // Update the currently displayed transport
+
+    transportDetailsContent.innerHTML = ''; // Clear previous content
+    transportDetailsContent.classList.remove('items-center', 'justify-center'); // Remove placeholder styling
+
+    const card = document.createElement('div');
+    card.className = 'w-full bg-white p-4 rounded-lg shadow-md text-center';
+
+    let detailsHTML = `<h4 class="text-lg font-semibold text-green-700 mb-2">${transport.icon} ${transport.name}</h4>`;
+    if (transport.subName) {
+        detailsHTML += `<p class="text-xs text-gray-600 mb-2">${transport.subName}</p>`;
+    }
+
+    if (transport.special) {
+        detailsHTML += `<p class="text-sm text-gray-700 my-2">${transport.details}</p>`;
+        if (transportKey === 'thsr_haoxing') {
+            const thsrButton = document.createElement('button');
+            thsrButton.className = 'mt-2 px-4 py-2 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition-colors';
+            thsrButton.textContent = '查看高鐵假期資訊';
+            thsrButton.onclick = showThsrInfoModal;
+            card.appendChild(thsrButton);
+        } else if (transportKey === 'taxi') {
+            const taxiButton = document.createElement('button');
+            taxiButton.className = 'mt-2 px-4 py-2 bg-yellow-500 text-white text-xs rounded-md hover:bg-yellow-600 transition-colors';
+            taxiButton.textContent = '查看計程車資訊';
+            taxiButton.onclick = showTaxiInfoModal;
+            card.appendChild(taxiButton);
+        }
+    } else {
+        detailsHTML += `<p class="text-sm text-gray-600">減碳數據: 約 ${transport.carbonReductionPer10km}g/10km</p>`;
+        detailsHTML += `<p class="text-sm text-gray-500 mt-1">好處: ${transport.benefits}</p>`;
+    }
+
+    card.innerHTML = detailsHTML; // Set innerHTML after potentially adding buttons for special cases
+    transportDetailsContent.appendChild(card);
+
+    // Highlight selected item in sidebar
+    document.querySelectorAll('.transport-list-item').forEach(item => {
+        item.classList.remove('bg-green-200', 'ring-2', 'ring-green-500');
+        if (item.dataset.transportKey === transportKey) {
+            item.classList.add('bg-green-200', 'ring-2', 'ring-green-500');
+        }
+    });
+     console.log("Displayed details for:", transportKey);
+}
+
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -1997,68 +2073,54 @@ document.addEventListener('DOMContentLoaded', () => {
     populatePoiList();
     populateActivityList();
     populateSelectableActionsList();
+    populateTransportListSidebar(); // V5: Populate new transport sidebar
 
     if (playerNameInput) playerNameInput.addEventListener('input', saveData);
 
-    document.querySelectorAll('.transport-option').forEach(button => {
-        button.addEventListener('click', () => {
-            // Only proceed if the click is not on the header meant for toggling details
-            // This check might be redundant if event.stopPropagation() is used effectively in the toggle handler
-            // However, it's a safeguard.
-            // For special buttons (THSR, Taxi), they don't have 'data-details-toggle', so their original logic is preserved.
-
-            const transportType = button.dataset.transport;
-            console.log("Transport option button clicked:", transportType);
-
-            if (transportType === 'thsr_haoxing') {
-                showThsrInfoModal();
-                return;
-            }
-            // The taxi button is handled by its ID, so this generic listener won't interfere negatively.
-
-            // If the button is a regular transport option (and not just a header click for toggle)
-            if (!button.querySelector('[data-details-toggle]')) { // Check if it's a special button without toggle parts
-                 document.querySelectorAll('.transport-option').forEach(btn => btn.classList.remove('selected'));
-                 button.classList.add('selected');
-                 currentTransport = transportType;
-                 showMissionPage();
-            } else if (button.classList.contains('transport-option')) { // It's a regular button, proceed with selection
-                 document.querySelectorAll('.transport-option').forEach(btn => btn.classList.remove('selected'));
-                 button.classList.add('selected');
-                 currentTransport = transportType;
-                 showMissionPage();
-            }
-        });
-    });
-
-    // New: Add event listeners for toggling transport details
-    document.querySelectorAll('[data-details-toggle]').forEach(header => {
-        header.addEventListener('click', function(event) {
-            event.stopPropagation(); // IMPORTANT: Prevent the parent button's click event
-
-            const transportType = this.dataset.detailsToggle;
-            // Find the details div within the SAME transport-option button
-            const parentButton = this.closest('.transport-option');
-            if (!parentButton) return;
-
-            const detailsDiv = parentButton.querySelector(`.transport-details`);
-            const icon = this.querySelector('.toggle-icon');
-
-            if (detailsDiv && icon) {
-                if (detailsDiv.classList.contains('hidden')) {
-                    detailsDiv.classList.remove('hidden');
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-up');
-                } else {
-                    detailsDiv.classList.add('hidden');
-                    icon.classList.remove('fa-chevron-up');
-                    icon.classList.add('fa-chevron-down');
-                }
+    // V5: Event listener for "參加永續任務" button
+    if (goToMissionButton) {
+        goToMissionButton.addEventListener('click', () => {
+            if (activelyDisplayedTransportKey) {
+                currentTransport = activelyDisplayedTransportKey;
+                console.log("Proceeding to mission with transport:", currentTransport);
             } else {
-                console.error('Could not find details or icon for toggle:', transportType, this);
+                currentTransport = null; // Or prompt user to select a transport
+                console.log("Proceeding to mission without a pre-selected transport.");
+                // Optionally, you could alert the user or default to a specific transport.
+                // For now, it will proceed, and the mission page will show "未選擇".
             }
+            showMissionPage();
         });
-    });
+    }
+
+
+    // Remove or comment out the old transport-option button listeners that caused navigation
+    // document.querySelectorAll('.transport-option').forEach(button => {
+    //     button.addEventListener('click', (event) => {
+    //         const transportType = button.dataset.transport;
+    //         // Special handling for THSR and Taxi buttons to show modals
+    //         if (transportType === 'thsr_haoxing') {
+    //             showThsrInfoModal();
+    //             return; // Prevent further processing for this button
+    //         }
+    //         if (button.id === 'taxi-info-button') { // Taxi button is identified by ID
+    //             showTaxiInfoModal();
+    //             return; // Prevent further processing for this button
+    //         }
+    //         // For other transport options, the click is now handled by the sidebar items
+    //         // or the header toggle. This main button click should do nothing for navigation.
+    //     });
+    // });
+
+    // Special button handling (THSR and Taxi) - their original individual listeners are still fine
+    // as they are not part of the new dynamic list and have specific IDs or data-transport.
+    const thsrButton = document.querySelector('[data-transport="thsr_haoxing"]');
+    if (thsrButton) {
+        thsrButton.addEventListener('click', showThsrInfoModal);
+    }
+    if (taxiInfoButton) { // taxiInfoButton is already a global const
+        taxiInfoButton.addEventListener('click', showTaxiInfoModal);
+    }
 
 
     // Market Mileage Button and Modal
@@ -2138,14 +2200,6 @@ document.addEventListener('DOMContentLoaded', () => {
         submitLogTripButton.addEventListener('click', submitLogTrip);
     } else {
         console.error('Log Trip Modal: Submit button not found.');
-    }
-
-    // Taxi Info Modal
-    if (taxiInfoButton) taxiInfoButton.addEventListener('click', showTaxiInfoModal);
-    if (taxiInfoModal) {
-        const taxiInfoModalCloseButton = taxiInfoModal.querySelector('.close-button');
-        if (taxiInfoModalCloseButton) taxiInfoModalCloseButton.addEventListener('click', hideTaxiInfoModal);
-        taxiInfoModal.addEventListener('click', (e) => { if (e.target === taxiInfoModal) hideTaxiInfoModal(); });
     }
 
     // SROI Info Modal
