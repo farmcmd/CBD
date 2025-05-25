@@ -58,7 +58,7 @@ let transportData = {
     carpool_4: { name: '私家車共乘 4 人', icon: '🚗', carbonReductionPer10km: 150, travelMode: null, metersPerPoint: 18000, benefits: '顯著減少碳排' }, // 18km = 18000m
     carpool_5: { name: '私家車共乘 5 人', icon: '🚗', carbonReductionPer10km: 200, travelMode: null, metersPerPoint: 16000, benefits: '最佳共乘效率' }, // 16km = 16000m
     thsr_haoxing: { name: '高鐵假期x台灣好行', icon: '🚄🚌', carbonReductionPer10km: 0, travelMode: null, metersPerPoint: Infinity, benefits: '輕鬆串聯城鄉', special: true, details: '減碳數據: 請參考專案說明' }, // THSR doesn't get points from distance in this model
-    taxi: { name: '我要預約多元計程車導覽旅遊', icon: '🚕', special: true, details: '點擊查看資訊' }
+    taxi: { name: '我要預約多元計程車導覽旅遊', icon: '🚕', special: true, details: '點擊下方按鈕查看資訊', id: 'taxi-info-button' } // Added id for special handling
 };
 
 
@@ -533,7 +533,12 @@ function showMissionPage() {
 
 
     // Check if transportData is defined before accessing its properties
-    currentTransportDisplay.textContent = currentTransport && transportData[currentTransport] ? transportData[currentTransport].name : '未選擇';
+    if (currentTransportDisplay && transportData) {
+        currentTransportDisplay.textContent = currentTransport && transportData[currentTransport] ? transportData[currentTransport].name : '未選擇';
+    } else if (currentTransportDisplay) {
+        currentTransportDisplay.textContent = '未選擇';
+    }
+
      updateSelectedPointsDisplay(); // Re-added updateSelectedPointsDisplay
      console.log("Showing mission page. Current transport:", currentTransport); // Debugging line
 }
@@ -723,10 +728,10 @@ function calculateTripMileage() {
      }
 
      if (currentTransport === null) {
-          tripCalculationStatusElement.textContent = '請先在首頁選擇交通方式！';
+          tripCalculationStatusElement.textContent = '請先透過「參加永續任務」按鈕選擇交通方式！'; // Modified message
           tripCalculationStatusElement.classList.remove('text-green-600');
           tripCalculationStatusElement.classList.add('text-red-600');
-          console.warn("Transport mode not selected."); // Debugging line
+          console.warn("Transport mode not selected for mileage calculation."); // Debugging line
           return;
      }
 
@@ -1996,74 +2001,109 @@ function hidePhotoAlbumModal() {
     }
 }
 
-// --- V5: New functions for transport card display ---
+// --- V5.1: Functions for new transport card display ---
 function populateTransportListSidebar() {
-    if (!transportListSidebar) return;
+    if (!transportListSidebar) {
+        console.error("transportListSidebar element not found!");
+        return;
+    }
     transportListSidebar.innerHTML = ''; // Clear existing items
 
     Object.keys(transportData).forEach(key => {
         const transport = transportData[key];
         const listItem = document.createElement('div');
-        listItem.className = 'transport-list-item p-3 bg-green-50 rounded-lg shadow hover:bg-green-100 cursor-pointer flex items-center transition-all duration-200 ease-in-out';
+        listItem.className = 'transport-list-item p-3 bg-gray-100 rounded-lg shadow hover:bg-gray-200 cursor-pointer flex items-center transition-all duration-200 ease-in-out';
         listItem.dataset.transportKey = key;
+
+        let title = transport.name;
+        // For 'bus_train', ensure subName is part of the title if it exists, for clarity in the list.
+        // However, the original V3 HTML structure for buttons only showed main name. Let's stick to that for the list.
+        // The subName is shown in the details card.
+
         listItem.innerHTML = `
             <span class="text-2xl mr-3">${transport.icon}</span>
-            <span class="font-semibold text-sm">${transport.name}</span>
+            <span class="font-semibold text-sm">${title}</span>
         `;
         listItem.addEventListener('click', () => displayTransportDetails(key));
         transportListSidebar.appendChild(listItem);
     });
+     console.log("Transport list sidebar populated.");
 }
 
 function displayTransportDetails(transportKey) {
-    if (!transportDetailsContent || !transportData[transportKey]) return;
+    if (!transportDetailsContent || !transportData[transportKey]) {
+        console.error("Cannot display transport details. Element or data missing.", transportKey);
+        if(transportDetailsContent) transportDetailsContent.innerHTML = '<p class="text-red-500 italic">無法載入交通方式詳細資訊。</p>';
+        return;
+    }
 
     const transport = transportData[transportKey];
     activelyDisplayedTransportKey = transportKey; // Update the currently displayed transport
 
     transportDetailsContent.innerHTML = ''; // Clear previous content
-    transportDetailsContent.classList.remove('items-center', 'justify-center'); // Remove placeholder styling
+    transportDetailsContent.classList.remove('items-center', 'justify-center', 'bg-gray-50'); // Remove placeholder/initial styling
+    transportDetailsContent.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md'); // Add card styling
 
-    const card = document.createElement('div');
-    card.className = 'w-full bg-white p-4 rounded-lg shadow-md text-center';
+    const cardContentDiv = document.createElement('div');
+    cardContentDiv.className = 'text-center';
 
-    let detailsHTML = `<h4 class="text-lg font-semibold text-green-700 mb-2">${transport.icon} ${transport.name}</h4>`;
+
+    let headerHTML = `<h4 class="text-xl font-semibold text-green-700 mb-2 flex items-center justify-center">${transport.icon}<span class="ml-2">${transport.name}</span></h4>`;
     if (transport.subName) {
-        detailsHTML += `<p class="text-xs text-gray-600 mb-2">${transport.subName}</p>`;
+        headerHTML += `<p class="text-sm text-gray-500 mb-3">${transport.subName}</p>`;
     }
+    cardContentDiv.innerHTML = headerHTML;
+
+    const detailsContainer = document.createElement('div');
+    detailsContainer.className = 'mt-3 border-t pt-3';
 
     if (transport.special) {
-        detailsHTML += `<p class="text-sm text-gray-700 my-2">${transport.details}</p>`;
+        const detailsP = document.createElement('p');
+        detailsP.className = 'text-sm text-gray-700 my-2';
+        detailsP.textContent = transport.details;
+        detailsContainer.appendChild(detailsP);
+
         if (transportKey === 'thsr_haoxing') {
             const thsrButton = document.createElement('button');
-            thsrButton.className = 'mt-2 px-4 py-2 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition-colors';
+            thsrButton.className = 'mt-3 px-4 py-2 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition-colors';
             thsrButton.textContent = '查看高鐵假期資訊';
-            thsrButton.onclick = showThsrInfoModal;
-            card.appendChild(thsrButton);
+            thsrButton.onclick = showThsrInfoModal; // Ensure this function exists and works
+            detailsContainer.appendChild(thsrButton);
         } else if (transportKey === 'taxi') {
             const taxiButton = document.createElement('button');
-            taxiButton.className = 'mt-2 px-4 py-2 bg-yellow-500 text-white text-xs rounded-md hover:bg-yellow-600 transition-colors';
+            taxiButton.className = 'mt-3 px-4 py-2 bg-yellow-500 text-white text-xs rounded-md hover:bg-yellow-600 transition-colors';
             taxiButton.textContent = '查看計程車資訊';
-            taxiButton.onclick = showTaxiInfoModal;
-            card.appendChild(taxiButton);
+            taxiButton.onclick = showTaxiInfoModal; // Ensure this function exists and works
+            detailsContainer.appendChild(taxiButton);
         }
     } else {
-        detailsHTML += `<p class="text-sm text-gray-600">減碳數據: 約 ${transport.carbonReductionPer10km}g/10km</p>`;
-        detailsHTML += `<p class="text-sm text-gray-500 mt-1">好處: ${transport.benefits}</p>`;
-    }
+        const dataP = document.createElement('p');
+        dataP.className = 'text-sm text-gray-600';
+        dataP.textContent = `減碳數據: 約 ${transport.carbonReductionPer10km}g/10km`;
+        detailsContainer.appendChild(dataP);
 
-    card.innerHTML = detailsHTML; // Set innerHTML after potentially adding buttons for special cases
-    transportDetailsContent.appendChild(card);
+        if (transport.benefits) {
+            const benefitsP = document.createElement('p');
+            benefitsP.className = 'text-sm text-gray-500 mt-1';
+            benefitsP.textContent = `好處: ${transport.benefits}`;
+            detailsContainer.appendChild(benefitsP);
+        }
+    }
+    cardContentDiv.appendChild(detailsContainer);
+    transportDetailsContent.appendChild(cardContentDiv);
 
     // Highlight selected item in sidebar
     document.querySelectorAll('.transport-list-item').forEach(item => {
-        item.classList.remove('bg-green-200', 'ring-2', 'ring-green-500');
+        item.classList.remove('bg-green-200', 'ring-2', 'ring-green-500', 'font-bold');
+        item.classList.add('bg-gray-100', 'hover:bg-gray-200');
         if (item.dataset.transportKey === transportKey) {
-            item.classList.add('bg-green-200', 'ring-2', 'ring-green-500');
+            item.classList.remove('bg-gray-100', 'hover:bg-gray-200');
+            item.classList.add('bg-green-200', 'ring-2', 'ring-green-500', 'font-bold');
         }
     });
-     console.log("Displayed details for:", transportKey);
+    console.log("Displayed details for:", transportKey);
 }
+
 
 
 // --- Event Listeners ---
@@ -2073,55 +2113,38 @@ document.addEventListener('DOMContentLoaded', () => {
     populatePoiList();
     populateActivityList();
     populateSelectableActionsList();
-    populateTransportListSidebar(); // V5: Populate new transport sidebar
+    populateTransportListSidebar(); // V5.1: Populate new transport sidebar
 
     if (playerNameInput) playerNameInput.addEventListener('input', saveData);
 
-    // V5: Event listener for "參加永續任務" button
+    // V5.1: Event listener for "參加永續任務" button
     if (goToMissionButton) {
         goToMissionButton.addEventListener('click', () => {
             if (activelyDisplayedTransportKey) {
                 currentTransport = activelyDisplayedTransportKey;
                 console.log("Proceeding to mission with transport:", currentTransport);
             } else {
-                currentTransport = null; // Or prompt user to select a transport
-                console.log("Proceeding to mission without a pre-selected transport.");
-                // Optionally, you could alert the user or default to a specific transport.
-                // For now, it will proceed, and the mission page will show "未選擇".
+                currentTransport = null; 
+                console.log("Proceeding to mission without a pre-selected transport. Please select one from the list first.");
+                // Optionally alert the user if no transport is selected.
+                // alert("請先從左側列表中選擇一個交通方式。");
+                // return; // Prevent going to mission page if no transport is chosen.
             }
             showMissionPage();
         });
     }
 
 
-    // Remove or comment out the old transport-option button listeners that caused navigation
-    // document.querySelectorAll('.transport-option').forEach(button => {
-    //     button.addEventListener('click', (event) => {
-    //         const transportType = button.dataset.transport;
-    //         // Special handling for THSR and Taxi buttons to show modals
-    //         if (transportType === 'thsr_haoxing') {
-    //             showThsrInfoModal();
-    //             return; // Prevent further processing for this button
-    //         }
-    //         if (button.id === 'taxi-info-button') { // Taxi button is identified by ID
-    //             showTaxiInfoModal();
-    //             return; // Prevent further processing for this button
-    //         }
-    //         // For other transport options, the click is now handled by the sidebar items
-    //         // or the header toggle. This main button click should do nothing for navigation.
-    //     });
-    // });
+    // Remove old event listeners for '.transport-option' that handled navigation
+    // The new transport selection logic is handled by displayTransportDetails and goToMissionButton
 
-    // Special button handling (THSR and Taxi) - their original individual listeners are still fine
-    // as they are not part of the new dynamic list and have specific IDs or data-transport.
-    const thsrButton = document.querySelector('[data-transport="thsr_haoxing"]');
-    if (thsrButton) {
-        thsrButton.addEventListener('click', showThsrInfoModal);
-    }
-    if (taxiInfoButton) { // taxiInfoButton is already a global const
-        taxiInfoButton.addEventListener('click', showTaxiInfoModal);
-    }
-
+    // Keep event listeners for special buttons if they are outside the dynamic list
+    // const thsrButtonOld = document.querySelector('[data-transport="thsr_haoxing"]'); // This was the old way
+    // if (thsrButtonOld) {
+    //    thsrButtonOld.addEventListener('click', showThsrInfoModal);
+    // }
+    // The taxiInfoButton is handled globally by its ID if it exists directly in HTML
+    // For V5, THSR and Taxi are part of the dynamic list and their modals are triggered from displayTransportDetails
 
     // Market Mileage Button and Modal
     if (marketMileageButton) marketMileageButton.addEventListener('click', showMarketSelectionModal);
@@ -2201,6 +2224,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('Log Trip Modal: Submit button not found.');
     }
+    
+    // Taxi Info Modal (this one is an actual button in HTML, not dynamic)
+    if (taxiInfoButton && !transportData.taxi) { // Check if not handled by dynamic list
+        taxiInfoButton.addEventListener('click', showTaxiInfoModal);
+    }
+
 
     // SROI Info Modal
     if (sroiInfoModal) {
