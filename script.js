@@ -209,6 +209,7 @@ const thsrInfoModal = document.getElementById('thsr-info-modal'); // THSR Info M
 const selectableActionsListElement = document.getElementById('selectable-actions-list'); // Element to display selectable actions
 const downloadDataButton = document.getElementById('download-data-button'); // New download button element
 const activityModalImage = document.getElementById('activity-modal-image'); // Get the activity modal image element
+const refreshMapPageButton = document.getElementById('refresh-map-page-button'); // New refresh button
 
 // New DOM elements for Log Trip Modal
 const logTripModal = document.getElementById('log-trip-modal');
@@ -2118,6 +2119,13 @@ document.addEventListener('DOMContentLoaded', () => {
     taxiInfoModal.addEventListener('click', (e) => { if (e.target === taxiInfoModal) hideTaxiInfoModal(); });
     sroiInfoModal.querySelector('.close-button').addEventListener('click', hideSroiInfoModal);
     sroiInfoModal.addEventListener('click', (e) => { if (e.target === sroiInfoModal) hideSroiInfoModal(); });
+
+    if (refreshMapPageButton) {
+        refreshMapPageButton.addEventListener('click', () => {
+            console.log("Refresh map page button clicked."); // Debugging line
+            location.reload();
+        });
+    }
 
     showHomepage();
     console.log("All event listeners set up. Initial homepage display triggered.");
