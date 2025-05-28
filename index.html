@@ -14,7 +14,7 @@
 <body class="bg-gray-100 text-gray-800 font-sans">
 
     <header class="bg-green-700 text-white p-6 text-center shadow-md relative">
-         <div class="absolute top-3 left-3 text-left text-xs text-gray-200">請使用單一瀏覽器，清除cookie會使紀錄流失</div>
+         <div class="absolute top-3 left-3 text-left text-xs text-red-400 font-bold">注意：請使用單一瀏覽器，清除瀏覽器cookie前請利用「下載永續數據」留存您的紀錄</div>
         <h1 class="text-3xl font-bold">水里永續共好聯盟 – 山村永續旅遊</h1>
         <p class="mt-2 text-lg">一起用低碳方式探索美麗水里山村</p>
     </header>
@@ -202,7 +202,12 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 bg-gray-200 rounded-lg overflow-hidden shadow-md p-6">
                 <div class="lg:col-span-2">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">地圖探索</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-700">地圖探索</h3>
+                        <button id="refresh-map-page-button" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150 ease-in-out" title="刷新頁面">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                     <div id="map"></div>
                      <div id="map-status" class="text-center text-sm text-gray-600 mt-4">
                          地圖載入中... (等待 Google Maps API)
